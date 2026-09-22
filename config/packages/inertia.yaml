@@ -1,0 +1,7 @@
+inertia:
+    root_view: "base.html.twig"
+    # Enable Server-Side Rendering via an external Node.js SSR server.
+    # Requires symfony/http-client: composer require symfony/http-client
+    ssr_enabled: true
+    ssr_url: "http://127.0.0.1:13714"
+    ssr_bundle: "%kernel.project_dir%/bootstrap/ssr/ssr.js"

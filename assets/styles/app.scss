@@ -1,0 +1,12 @@
+@use "variables" as *;
+
+body {
+    background-color: $bg-page;
+    .start-container {
+        background-color: $bg-container;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: $spacing;
+        width: fit-content;
+        margin: $spacing auto;
+    }
+}

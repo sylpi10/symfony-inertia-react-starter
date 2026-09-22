@@ -267,7 +267,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         formats?: array<string, Param|string|list<scalar|Param|null>>,
  *     },
  *     assets?: bool|array{ // Assets configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         strict_mode?: bool|Param, // Throw an exception if an entry is missing from the manifest.json. // Default: false
  *         version_strategy?: scalar|Param|null, // Default: null
  *         version?: scalar|Param|null, // Default: null
@@ -471,7 +471,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     disallow_search_engine_index?: bool|Param, // Enabled by default when debug is enabled. // Default: true
  *     http_client?: bool|array{ // HTTP Client configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         max_host_connections?: int|Param, // The maximum number of connections to a single host.
  *         default_options?: array{
  *             headers?: array<string, mixed>,
@@ -701,28 +701,349 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         },
  *     },
  * }
+ * @psalm-type TwigConfig = array{
+ *     form_themes?: list<scalar|Param|null>,
+ *     globals?: array<string, array{ // Default: []
+ *         id?: scalar|Param|null,
+ *         type?: scalar|Param|null,
+ *         value?: mixed,
+ *         ...<string, mixed>
+ *     }>,
+ *     autoescape_service?: scalar|Param|null, // Default: null
+ *     autoescape_service_method?: scalar|Param|null, // Default: null
+ *     cache?: scalar|Param|null, // Default: true
+ *     charset?: scalar|Param|null, // Default: "%kernel.charset%"
+ *     debug?: bool|Param, // Default: "%kernel.debug%"
+ *     strict_variables?: bool|Param, // Default: "%kernel.debug%"
+ *     auto_reload?: scalar|Param|null,
+ *     optimizations?: int|Param,
+ *     default_path?: scalar|Param|null, // The default path used to load templates. // Default: "%kernel.project_dir%/templates"
+ *     file_name_pattern?: Param|string|list<scalar|Param|null>,
+ *     paths?: array<string, mixed>,
+ *     date?: array{ // The default format options used by the date filter.
+ *         format?: scalar|Param|null, // Default: "F j, Y H:i"
+ *         interval_format?: scalar|Param|null, // Default: "%d days"
+ *         timezone?: scalar|Param|null, // The timezone used when formatting dates, when set to null, the timezone returned by date_default_timezone_get() is used. // Default: null
+ *     },
+ *     number_format?: array{ // The default format options for the number_format filter.
+ *         decimals?: int|Param, // Default: 0
+ *         decimal_point?: scalar|Param|null, // Default: "."
+ *         thousands_separator?: scalar|Param|null, // Default: ","
+ *     },
+ *     mailer?: array{
+ *         html_to_text_converter?: scalar|Param|null, // A service implementing the "Symfony\Component\Mime\HtmlToTextConverter\HtmlToTextConverterInterface". // Default: null
+ *     },
+ * }
+ * @psalm-type TwigExtraConfig = array{
+ *     cache?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     html?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     markdown?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     intl?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     cssinliner?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     inky?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     string?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     commonmark?: array{
+ *         renderer?: array{ // Array of options for rendering HTML.
+ *             block_separator?: scalar|Param|null,
+ *             inner_separator?: scalar|Param|null,
+ *             soft_break?: scalar|Param|null,
+ *         },
+ *         html_input?: "strip"|"allow"|"escape"|Param, // How to handle HTML input.
+ *         allow_unsafe_links?: bool|Param, // Remove risky link and image URLs by setting this to false. // Default: true
+ *         max_nesting_level?: int|Param, // The maximum nesting level for blocks. // Default: 9223372036854775807
+ *         max_delimiters_per_line?: int|Param, // The maximum number of strong/emphasis delimiters per line. // Default: 9223372036854775807
+ *         slug_normalizer?: array{ // Array of options for configuring how URL-safe slugs are created.
+ *             instance?: mixed,
+ *             max_length?: int|Param, // Default: 255
+ *             unique?: mixed,
+ *         },
+ *         commonmark?: array{ // Array of options for configuring the CommonMark core extension.
+ *             enable_em?: bool|Param, // Default: true
+ *             enable_strong?: bool|Param, // Default: true
+ *             use_asterisk?: bool|Param, // Default: true
+ *             use_underscore?: bool|Param, // Default: true
+ *             unordered_list_markers?: list<scalar|Param|null>,
+ *         },
+ *         ...<string, mixed>
+ *     },
+ * }
+ * @psalm-type PentatrionViteConfig = array{
+ *     public_directory?: scalar|Param|null, // Default: "public"
+ *     build_directory?: scalar|Param|null, // we only need build_directory to locate entrypoints.json file, it's the "base" vite config parameter without slashes. // Default: "build"
+ *     proxy_origin?: scalar|Param|null, // Allows to use different origin for asset proxy, eg. http://host.docker.internal:5173 // Default: null
+ *     absolute_url?: bool|Param, // Prepend the rendered link and script tags with an absolute URL. // Default: false
+ *     throw_on_missing_entry?: scalar|Param|null, // Throw exception when entry is not present in the entrypoints file // Default: false
+ *     throw_on_missing_asset?: scalar|Param|null, // Throw exception when asset is not present in the manifest file // Default: true
+ *     cache?: bool|Param, // Enable caching of the entry point file(s) // Default: false
+ *     preload?: "none"|"link-tag"|"link-header"|Param, // preload all rendered script and link tags automatically via the http2 Link header. (symfony/web-link is required) Instead <link rel="modulepreload"> will be used. // Default: "link-tag"
+ *     crossorigin?: false|true|"anonymous"|"use-credentials"|Param, // crossorigin value, can be false, true (default), anonymous (same as true) or use-credentials // Default: true
+ *     script_attributes?: list<scalar|Param|null>,
+ *     link_attributes?: list<scalar|Param|null>,
+ *     preload_attributes?: list<scalar|Param|null>,
+ *     default_build?: scalar|Param|null, // Deprecated: The "default_build" option is deprecated. Use "default_config" instead. // Default: null
+ *     builds?: array<string, array{ // Default: []
+ *         build_directory?: scalar|Param|null, // Default: "build"
+ *         script_attributes?: list<scalar|Param|null>,
+ *         link_attributes?: list<scalar|Param|null>,
+ *         preload_attributes?: list<scalar|Param|null>,
+ *     }>,
+ *     default_config?: scalar|Param|null, // Default: null
+ *     configs?: array<string, array{ // Default: []
+ *         build_directory?: scalar|Param|null, // Default: "build"
+ *         script_attributes?: list<scalar|Param|null>,
+ *         link_attributes?: list<scalar|Param|null>,
+ *         preload_attributes?: list<scalar|Param|null>,
+ *     }>,
+ * }
+ * @psalm-type InertiaConfig = array{
+ *     root_view?: scalar|Param|null, // The root Twig template used to render the full HTML page on first visit. // Default: "base.html.twig"
+ *     version?: scalar|Param|null, // Asset version string. When it changes, Inertia triggers a full page reload. Set to null to disable. // Default: null
+ *     intercept_validation_errors?: bool|Param, // When true, ValidationFailedException (MapRequestPayload/MapQueryString or manual throw) on Inertia requests is converted into the error flow: errors in session + 303 redirect back. Set to false to keep Symfony's default 4xx behavior. // Default: true
+ *     encrypt_history?: bool|Param, // Globally enable browser history encryption for all Inertia responses. Can be overridden per-render via Inertia::encryptHistory(). // Default: false
+ *     expose_shared_prop_keys?: bool|Param, // When true, the page object includes a sharedProps field listing keys coming from Inertia::share(). Allows the client to distinguish shared from page-specific props. // Default: true
+ *     ssr_enabled?: bool|Param, // Enable Server-Side Rendering via an external Node.js SSR server. // Default: false
+ *     ssr_url?: scalar|Param|null, // URL of the SSR server (used only when ssr_enabled is true). // Default: "http://127.0.0.1:13714"
+ *     ssr_bundle?: scalar|Param|null, // Path to the SSR bundle JS file. If null, auto-detected from common paths (bootstrap/ssr/ssr.mjs, public/build/ssr/ssr.mjs). // Default: null
+ *     ssr_throw_on_error?: bool|Param, // When true, SSR rendering failures throw a SsrException instead of silently falling back to client-side rendering. Useful for E2E tests. // Default: false
+ *     pages?: array{ // Component file validation settings.
+ *         ensure_pages_exist?: bool|Param, // When true, Inertia::render() will throw if the component file does not exist on disk. Requires pages.paths to be configured. // Default: false
+ *         paths?: list<scalar|Param|null>,
+ *         extensions?: list<scalar|Param|null>,
+ *     },
+ *     testing?: array{ // Settings for test assertions (AssertableInertiaPage).
+ *         ensure_pages_exist?: bool|Param, // When true, AssertableInertiaPage::component() validates the file exists on disk. Uses pages.paths and pages.extensions. // Default: true
+ *     },
+ * }
+ * @psalm-type WebProfilerConfig = array{
+ *     toolbar?: bool|array{ // Profiler toolbar configuration
+ *         enabled?: bool|Param, // Default: false
+ *         ajax_replace?: bool|Param, // Replace toolbar on AJAX requests // Default: false
+ *     },
+ *     intercept_redirects?: bool|Param, // Default: false
+ *     excluded_ajax_paths?: scalar|Param|null, // Default: "^/((index|app(_[\\w]+)?)\\.php/)?_wdt"
+ * }
+ * @psalm-type MonologConfig = array{
+ *     use_microseconds?: scalar|Param|null, // Default: true
+ *     timezone?: string|Param, // The timezone used for the timestamp of every log record (e.g. "UTC" or "Europe/Paris"). Defaults to the PHP default timezone. // Default: null
+ *     channels?: list<scalar|Param|null>,
+ *     handlers?: array<string, array{ // Default: []
+ *         type?: scalar|Param|null,
+ *         id?: scalar|Param|null,
+ *         enabled?: bool|Param, // Default: true
+ *         priority?: scalar|Param|null, // Default: 0
+ *         level?: scalar|Param|null, // Default: "DEBUG"
+ *         bubble?: bool|Param, // Default: true
+ *         interactive_only?: bool|Param, // Default: false
+ *         app_name?: scalar|Param|null, // Default: null
+ *         include_stacktraces?: bool|Param, // Default: false
+ *         base_path?: scalar|Param|null, // Default: null
+ *         process_psr_3_messages?: array{
+ *             enabled?: bool|Param|null, // Default: null
+ *             date_format?: scalar|Param|null,
+ *             remove_used_context_fields?: bool|Param,
+ *             ...<string, mixed>
+ *         },
+ *         path?: scalar|Param|null, // Default: "%kernel.logs_dir%/%kernel.environment%.log"
+ *         file_permission?: scalar|Param|null, // Default: null
+ *         use_locking?: bool|Param, // Default: false
+ *         filename_format?: scalar|Param|null, // Default: "{filename}-{date}"
+ *         date_format?: scalar|Param|null, // Default: "Y-m-d"
+ *         ident?: scalar|Param|null, // Default: "php"
+ *         logopts?: scalar|Param|null, // Default: 1
+ *         facility?: scalar|Param|null, // Default: "user"
+ *         max_files?: scalar|Param|null, // Default: 0
+ *         action_level?: scalar|Param|null, // Default: "WARNING"
+ *         activation_strategy?: scalar|Param|null, // Default: null
+ *         stop_buffering?: bool|Param, // Default: true
+ *         passthru_level?: scalar|Param|null, // Default: null
+ *         excluded_http_codes?: list<array{ // Default: []
+ *             code?: scalar|Param|null,
+ *             urls?: list<scalar|Param|null>,
+ *         }>,
+ *         accepted_levels?: list<scalar|Param|null>,
+ *         min_level?: scalar|Param|null, // Default: "DEBUG"
+ *         max_level?: scalar|Param|null, // Default: "EMERGENCY"
+ *         buffer_size?: scalar|Param|null, // Default: 0
+ *         flush_on_overflow?: bool|Param, // Default: false
+ *         handler?: scalar|Param|null,
+ *         url?: scalar|Param|null,
+ *         exchange?: scalar|Param|null,
+ *         exchange_name?: scalar|Param|null, // Default: "log"
+ *         channel?: scalar|Param|null, // Default: null
+ *         bot_name?: scalar|Param|null, // Default: "Monolog"
+ *         use_attachment?: scalar|Param|null, // Default: true
+ *         use_short_attachment?: scalar|Param|null, // Default: false
+ *         include_extra?: scalar|Param|null, // Default: false
+ *         icon_emoji?: scalar|Param|null, // Default: null
+ *         webhook_url?: scalar|Param|null,
+ *         exclude_fields?: list<scalar|Param|null>,
+ *         token?: scalar|Param|null,
+ *         region?: scalar|Param|null,
+ *         source?: scalar|Param|null,
+ *         use_ssl?: bool|Param, // Default: true
+ *         user?: mixed,
+ *         title?: scalar|Param|null, // Default: null
+ *         host?: scalar|Param|null, // Default: null
+ *         port?: scalar|Param|null, // Default: 514
+ *         rfc?: scalar|Param|null, // Default: 1
+ *         config?: list<scalar|Param|null>,
+ *         members?: list<scalar|Param|null>,
+ *         connection_string?: scalar|Param|null,
+ *         timeout?: scalar|Param|null,
+ *         time?: scalar|Param|null, // Default: 60
+ *         deduplication_level?: scalar|Param|null, // Default: 400
+ *         store?: scalar|Param|null, // Default: null
+ *         connection_timeout?: scalar|Param|null,
+ *         persistent?: bool|Param,
+ *         message_type?: scalar|Param|null, // Default: 0
+ *         expand_newlines?: bool|Param, // Default: false
+ *         parse_mode?: scalar|Param|null, // Default: null
+ *         disable_webpage_preview?: bool|Param|null, // Default: null
+ *         disable_notification?: bool|Param|null, // Default: null
+ *         split_long_messages?: bool|Param, // Default: false
+ *         delay_between_messages?: bool|Param, // Default: false
+ *         topic?: int|Param, // Default: null
+ *         factor?: int|Param, // Default: 1
+ *         tags?: Param|string|list<scalar|Param|null>,
+ *         console_formatter_options?: mixed, // Default: []
+ *         formatter?: scalar|Param|null,
+ *         nested?: bool|Param, // Default: false
+ *         publisher?: Param|string|array{
+ *             id?: scalar|Param|null,
+ *             hostname?: scalar|Param|null,
+ *             port?: scalar|Param|null, // Default: 12201
+ *             chunk_size?: scalar|Param|null, // Default: 1420
+ *             encoder?: "json"|"compressed_json"|Param,
+ *         },
+ *         mongodb?: Param|string|array{
+ *             id?: scalar|Param|null, // ID of a MongoDB\Client service
+ *             uri?: scalar|Param|null,
+ *             username?: scalar|Param|null,
+ *             password?: scalar|Param|null,
+ *             database?: scalar|Param|null, // Default: "monolog"
+ *             collection?: scalar|Param|null, // Default: "logs"
+ *         },
+ *         elasticsearch?: Param|string|array{
+ *             id?: scalar|Param|null,
+ *             hosts?: list<scalar|Param|null>,
+ *             host?: scalar|Param|null,
+ *             port?: scalar|Param|null, // Default: 9200
+ *             transport?: scalar|Param|null, // Default: "Http"
+ *             user?: scalar|Param|null, // Default: null
+ *             password?: scalar|Param|null, // Default: null
+ *         },
+ *         index?: scalar|Param|null, // Default: "monolog"
+ *         document_type?: scalar|Param|null, // Default: "logs"
+ *         ignore_error?: scalar|Param|null, // Default: false
+ *         redis?: Param|string|array{
+ *             id?: scalar|Param|null,
+ *             host?: scalar|Param|null,
+ *             password?: scalar|Param|null, // Default: null
+ *             port?: scalar|Param|null, // Default: 6379
+ *             database?: scalar|Param|null, // Default: 0
+ *             key_name?: scalar|Param|null, // Default: "monolog_redis"
+ *         },
+ *         predis?: Param|string|array{ // Deprecated: The "predis" option is deprecated and ignored, use the "redis" option to configure the Predis client.
+ *             id?: scalar|Param|null,
+ *             host?: scalar|Param|null,
+ *         },
+ *         from_email?: scalar|Param|null,
+ *         to_email?: Param|string|list<scalar|Param|null>,
+ *         subject?: scalar|Param|null,
+ *         content_type?: scalar|Param|null, // Default: null
+ *         headers?: list<scalar|Param|null>,
+ *         parameters?: list<scalar|Param|null>,
+ *         mailer?: scalar|Param|null, // Default: null
+ *         email_prototype?: Param|string|array{
+ *             id?: scalar|Param|null,
+ *             method?: scalar|Param|null, // Default: null
+ *         },
+ *         verbosity_levels?: array{
+ *             VERBOSITY_QUIET?: scalar|Param|null, // Default: "ERROR"
+ *             VERBOSITY_NORMAL?: scalar|Param|null, // Default: "WARNING"
+ *             VERBOSITY_VERBOSE?: scalar|Param|null, // Default: "NOTICE"
+ *             VERBOSITY_VERY_VERBOSE?: scalar|Param|null, // Default: "INFO"
+ *             VERBOSITY_DEBUG?: scalar|Param|null, // Default: "DEBUG"
+ *         },
+ *         channels?: Param|string|array{
+ *             type?: scalar|Param|null,
+ *             elements?: list<scalar|Param|null>,
+ *             ...<string, mixed>
+ *         },
+ *     }>,
+ * }
+ * @psalm-type DebugConfig = array{
+ *     max_items?: int|Param, // Max number of displayed items past the first level, -1 means no limit. // Default: 2500
+ *     min_depth?: int|Param, // Minimum tree depth to clone all the items, 1 is default. // Default: 1
+ *     max_string_length?: int|Param, // Max length of displayed strings, -1 means no limit. // Default: -1
+ *     dump_destination?: scalar|Param|null, // A stream URL where dumps should be written to. // Default: null
+ *     theme?: "dark"|"light"|Param, // Changes the color of the dump() output when rendered directly on the templating. "dark" (default) or "light". // Default: "dark"
+ * }
+ * @psalm-type MakerConfig = array{
+ *     root_namespace?: scalar|Param|null, // Default: "App"
+ *     generate_final_classes?: bool|Param, // Default: true
+ *     generate_final_entities?: bool|Param, // Default: false
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
  *     services?: ServicesConfig,
  *     framework?: FrameworkConfig,
+ *     twig?: TwigConfig,
+ *     twig_extra?: TwigExtraConfig,
+ *     pentatrion_vite?: PentatrionViteConfig,
+ *     inertia?: InertiaConfig,
+ *     monolog?: MonologConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
  *         services?: ServicesConfig,
  *         framework?: FrameworkConfig,
+ *         twig?: TwigConfig,
+ *         twig_extra?: TwigExtraConfig,
+ *         pentatrion_vite?: PentatrionViteConfig,
+ *         inertia?: InertiaConfig,
+ *         web_profiler?: WebProfilerConfig,
+ *         monolog?: MonologConfig,
+ *         debug?: DebugConfig,
+ *         maker?: MakerConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
  *         services?: ServicesConfig,
  *         framework?: FrameworkConfig,
+ *         twig?: TwigConfig,
+ *         twig_extra?: TwigExtraConfig,
+ *         pentatrion_vite?: PentatrionViteConfig,
+ *         inertia?: InertiaConfig,
+ *         monolog?: MonologConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
  *         services?: ServicesConfig,
  *         framework?: FrameworkConfig,
+ *         twig?: TwigConfig,
+ *         twig_extra?: TwigExtraConfig,
+ *         pentatrion_vite?: PentatrionViteConfig,
+ *         inertia?: InertiaConfig,
+ *         web_profiler?: WebProfilerConfig,
+ *         monolog?: MonologConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,
