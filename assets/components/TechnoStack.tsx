@@ -1,4 +1,4 @@
-export function TechnoList({ technos }: { technos: string[] }) {
+export function TechnoStack({ technos }: { technos: string[] }) {
     return (
         <div>
             <ul>

@@ -2,11 +2,34 @@
 
 body {
     background-color: $bg-page;
-    .start-container {
+    padding: 0;
+    margin: 0;
+    .container {
         background-color: $bg-container;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         padding: $spacing;
         width: fit-content;
         margin: $spacing auto;
+        border-radius: 8px;
+        width: min(748px, 80%);
+        p {
+            font-size: 1.3rem;
+        }
+    }
+
+    .main-nav {
+        display: flex;
+        justify-content: center;
+        gap: $spacing;
+        padding: $spacing;
+        margin: 0;
+        background-color: $bg-container;
+        a {
+            text-decoration: none;
+            &.active {
+                font-weight: bold;
+                text-decoration: underline;
+            }
+        }
     }
 }

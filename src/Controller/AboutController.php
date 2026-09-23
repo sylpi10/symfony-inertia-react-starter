@@ -8,28 +8,24 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class HomeController extends AbstractController
+final class AboutController extends AbstractController
 {
     public function __construct(
         private readonly TechStack $techStack,
         private readonly Inertia $inertia,
     ) {}
 
-    #[Route("/", name: "app_home")]
+    #[Route("/about", name: "app_about")]
     public function index(): Response
     {
         /**
          * @var list<string> $technos
-         */
-        $technos = $this->techStack->getStack();
+         */ $technos = $this->techStack->getStack();
 
-        /** @var string $para */
-        $para =
-            "Home: Symfony with React via Inertia.js, server-side rendered with Node";
-
-        return $this->inertia->render("Home", [
-            "title" => "Home Page",
-            "para" => $para,
+        return $this->inertia->render("About", [
+            "title" => "About Page",
+            "para" =>
+                "About: Symfony with React via Inertia.js, server-side rendered with Node",
             "technos" => $technos,
         ]);
     }

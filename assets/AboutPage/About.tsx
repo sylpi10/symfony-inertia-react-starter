@@ -2,8 +2,7 @@ import { TechnoStack } from "../components/TechnoStack";
 
 type Props = { title: string; para: string };
 type TechnosProps = { technos: string[] };
-
-export default function Home({ title, para, technos }: Props & TechnosProps) {
+export default function About({ title, para, technos }: Props & TechnosProps) {
     return (
         <div className="container">
             <h1>{title}</h1>

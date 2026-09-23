@@ -1,136 +1,169 @@
-# Symfony + Inertia + React Starter
+# Symfony + React SPA powered by Inertia.js, with SSR
 
-Base de projet **Symfony 8.1** avec un front **React 19 + TypeScript**, reliés par **Inertia.js v3**, compilés avec **Vite**, stylés en **Sass**, et rendus côté serveur (**SSR**) via Node.
+A **Symfony 8.1** starter with a **React 19 + TypeScript** front end, glued together by **Inertia.js v3**, bundled with **Vite**, styled with **Sass**, and **server-side rendered** through Node.
 
-> Inertia permet de construire une SPA React **sans écrire d'API** : les contrôleurs Symfony restent des contrôleurs classiques (routing, sécurité, validation…), mais au lieu de rendre un template Twig, ils renvoient **un nom de composant React + des props**.
+> Inertia lets you build a React SPA **without writing an API**: Symfony controllers stay regular controllers (routing, security, validation…), but instead of rendering a Twig template they return **a React component name + props**.
 
 ---
 
-## Sommaire
+## Table of contents
 
 - [Stack](#stack)
-- [Prérequis](#prérequis)
-- [Installation](#installation)
-- [Lancer le projet en dev](#lancer-le-projet-en-dev)
-- [Build de production](#build-de-production)
-- [Comment ça marche](#comment-ça-marche)
-- [Créer une nouvelle page](#créer-une-nouvelle-page)
+- [Requirements](#requirements)
+- [Getting started](#getting-started)
+- [Running in development](#running-in-development)
+- [Production build](#production-build)
+- [How it works](#how-it-works)
+- [Pages and components](#pages-and-components)
+- [Adding a page](#adding-a-page)
+- [Layout and navigation](#layout-and-navigation)
 - [Styles (Sass)](#styles-sass)
 - [SSR](#ssr)
-- [Structure du projet](#structure-du-projet)
-- [Pièges connus](#pièges-connus)
+- [Project structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
 
 ---
 
 ## Stack
 
-| Côté | Outil | Rôle |
-|---|---|---|
-| Back | `symfony/framework-bundle` 8.1 | Framework |
-| Back | `symfony/twig-bundle` | Une seule vue HTML racine (`base.html.twig`) |
-| Back | `nytodev/inertia-bundle` | Adaptateur serveur Inertia v3 (`$inertia->render()`) |
-| Back | `pentatrion/vite-bundle` | Lien Symfony ↔ Vite (`vite_entry_*_tags`) |
-| Back | `symfony/http-client` | Appels Symfony → serveur SSR Node |
-| Front | `react` / `react-dom` 19 | UI |
-| Front | `@inertiajs/react` 3 | Adaptateur client Inertia |
-| Front | `typescript` | Typage (vérification uniquement, Vite compile) |
-| Front | `vite` + `vite-plugin-symfony` + `@vitejs/plugin-react` | Build & serveur de dev |
-| Front | `sass-embedded` | Compilation Sass |
-| Dev | `symfony/debug-pack`, `maker-bundle`, `test-pack` | Profiler, makers, PHPUnit |
+| Side  | Tool                                                    | Purpose                                          |
+| ----- | ------------------------------------------------------- | ------------------------------------------------ |
+| Back  | `symfony/framework-bundle` 8.1                          | Framework                                        |
+| Back  | `symfony/twig-bundle`                                   | A single root HTML view (`base.html.twig`)       |
+| Back  | `nytodev/inertia-bundle`                                | Inertia v3 server adapter (`$inertia->render()`) |
+| Back  | `pentatrion/vite-bundle`                                | Symfony ↔ Vite integration (`vite_entry_*_tags`) |
+| Back  | `symfony/http-client`                                   | Symfony → Node SSR server calls                  |
+| Front | `react` / `react-dom` 19                                | UI                                               |
+| Front | `@inertiajs/react` 3                                    | Inertia client adapter                           |
+| Front | `typescript`                                            | Type checking only (Vite does the compiling)     |
+| Front | `vite` + `vite-plugin-symfony` + `@vitejs/plugin-react` | Build & dev server                               |
+| Front | `sass-embedded`                                         | Sass compiler                                    |
+| Dev   | `symfony/debug-pack`, `maker-bundle`, `test-pack`       | Profiler, makers, PHPUnit                        |
 
-## Prérequis
+## Requirements
 
 - PHP ≥ 8.4
 - Composer
-- Node.js (testé avec v24) + npm
-- [Symfony CLI](https://symfony.com/download) (recommandé)
+- Node.js (tested with v24) + npm
+- [Symfony CLI](https://symfony.com/download) (recommended)
 
-## Installation
+## Getting started
 
-À partir de ce dépôt utilisé comme modèle :
+This repository is a **GitHub template**: click **Use this template → Create a new repository**, then:
 
 ```bash
-git clone git@github.com:sylpi10/symfony-inertia-react-starter.git mon-projet
-cd mon-projet
-rm -rf .git && git init
+git clone git@github.com:<you>/<your-project>.git
+cd <your-project>
 
 composer install
 npm install
 ```
 
-## Lancer le projet en dev
-
-Trois processus, trois terminaux :
+Then generate your own dev secret and paste it as `APP_SECRET` in `.env.dev`:
 
 ```bash
-# 1. Serveur PHP
+php -r 'echo bin2hex(random_bytes(16)), PHP_EOL;'
+```
+
+## Running in development
+
+Three processes, three terminals:
+
+```bash
+# 1. PHP server
 symfony serve -d
 
-# 2. Serveur Vite (JS/CSS à la volée + hot reload)
+# 2. Vite dev server (on-the-fly JS/CSS + hot reload)
 npm run dev
 
-# 3. (optionnel) Serveur SSR
+# 3. (optional) SSR server
 npm run build:ssr
 symfony console inertia:start-ssr
 ```
 
-Puis ouvrir **http://localhost:8000**.
+Then open **http://localhost:8000**.
 
-> ⚠️ `http://localhost:5173` n'est **pas** l'application : c'est le serveur d'assets de Vite. L'app se consulte toujours via Symfony (port 8000).
+> ⚠️ `http://localhost:5173` is **not** the app: it's Vite's asset server. Always browse the app through Symfony (port 8000).
 
-Le serveur SSR est optionnel en dev : s'il est arrêté, Inertia bascule silencieusement en rendu côté client.
+The SSR server is optional in development: when it's down, Inertia silently falls back to client-side rendering.
 
-## Build de production
+## Production build
 
 ```bash
 npm run build
 ```
 
-Ce script enchaîne deux builds :
+This script runs two builds:
 
-| Script | Config | Sortie | Contenu |
-|---|---|---|---|
-| `vite build` | `vite.config.js` | `public/build/` | JS + CSS client, `entrypoints.json` |
-| `npm run build:ssr` | `vite.ssr.config.js` | `bootstrap/ssr/ssr.js` | Bundle Node pour le SSR |
+| Script              | Config               | Output                 | Contents                            |
+| ------------------- | -------------------- | ---------------------- | ----------------------------------- |
+| `vite build`        | `vite.config.js`     | `public/build/`        | Client JS + CSS, `entrypoints.json` |
+| `npm run build:ssr` | `vite.ssr.config.js` | `bootstrap/ssr/ssr.js` | Node bundle for SSR                 |
 
-En production, le serveur SSR doit tourner sous un gestionnaire de processus (systemd, Supervisor…) avec `node bootstrap/ssr/ssr.js`, et être redémarré après chaque déploiement.
+In production, run the SSR server under a process manager (systemd, Supervisor…) with `node bootstrap/ssr/ssr.js`, and restart it after every deploy.
 
 ---
 
-## Comment ça marche
+## How it works
 
-### Première visite (chargement complet)
+### First visit (full page load)
 
 ```
-Navigateur ──GET /──▶ Symfony (HomeController)
-                         │  $inertia->render('Home', ['message' => ...])
-                         │
-                         ├──POST /render──▶ Serveur SSR Node (port 13714)
-                         │◀── HTML de <Home /> ──┘
-                         ▼
-                   base.html.twig
-                   ├─ {{ inertiaHead(page) }}   → balises <head> issues du SSR
-                   ├─ {{ vite_entry_*_tags }}   → CSS + JS
-                   └─ {{ inertia(page) }}       → HTML pré-rendu + JSON de la page
-                         │
-Navigateur ◀─────────────┘
-   └─ React "hydrate" le HTML existant (hydrateRoot)
+Browser ──GET /──▶ Symfony (HomeController)
+                      │  $inertia->render('Home', ['message' => ...])
+                      │
+                      ├──POST /render──▶ Node SSR server (port 13714)
+                      │◀── <Home /> HTML ──┘
+                      ▼
+                base.html.twig
+                ├─ {{ inertiaHead(page) }}   → <head> tags from SSR
+                ├─ {{ vite_entry_*_tags }}   → CSS + JS
+                └─ {{ inertia(page) }}       → pre-rendered HTML + page JSON
+                      │
+Browser ◀─────────────┘
+   └─ React hydrates the existing HTML (hydrateRoot)
 ```
 
-### Navigations suivantes
+### Subsequent navigation
 
-Les liens Inertia (`<Link>`) font une requête XHR avec l'en-tête `X-Inertia`. Symfony répond alors **uniquement en JSON** (`{ component, props, url, version }`) et React remplace le composant, sans rechargement de page.
+Inertia links (`<Link>`) send an XHR request with an `X-Inertia: true` header. The **same controller** answers, but the bundle returns **JSON only** (`{ component, props, url, version }`), and React swaps the page component without a full reload.
 
-### Résolution des composants
+|                  | Plain `<a href>`       | Inertia `<Link href>`                |
+| ---------------- | ---------------------- | ------------------------------------ |
+| Request          | Full HTML page         | XHR with `X-Inertia: true`           |
+| Symfony response | Full HTML (Twig + SSR) | JSON `{ component, props, url }`     |
+| Browser          | Full reload            | React swaps the page, URL is updated |
 
-`$inertia->render('Home')` → `assets/Pages/Home.tsx`, via `import.meta.glob` dans `assets/app.tsx` (client) et `assets/ssr.tsx` (serveur).
+There is **no client-side router**: routes live exclusively in Symfony (`#[Route]`).
 
-## Créer une nouvelle page
+## Pages and components
 
-**1. Le contrôleur**
+Everything is a React component. A **page** is simply the root component a controller renders by name.
+
+**Resolution rule** (see `assets/resolvePage.tsx`):
+
+```
+$inertia->render('Home')  →  assets/HomePage/Home.tsx
+$inertia->render('About') →  assets/AboutPage/About.tsx
+```
+
+The same resolver is shared by the client (`app.tsx`) and the SSR entry (`ssr.tsx`). Pages are lazy-loaded: each one becomes its own JS chunk, fetched on first visit.
+
+Other components live on two levels:
+
+| Level      | Location               | When                      |
+| ---------- | ---------------------- | ------------------------- |
+| **Local**  | Inside the page folder | Only used by that page    |
+| **Shared** | `assets/components/`   | Used by two or more pages |
+
+Rule of thumb: start local, move to `components/` when a second page needs it.
+
+## Adding a page
+
+**1. The controller**
 
 ```php
-// src/Controller/AboutController.php
+// src/Controller/ContactController.php
 namespace App\Controller;
 
 use Nytodev\InertiaBundle\Service\Inertia;
@@ -138,100 +171,125 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class AboutController extends AbstractController
+final class ContactController extends AbstractController
 {
-    #[Route('/about', name: 'about')]
+    #[Route('/contact', name: 'contact')]
     public function index(Inertia $inertia): Response
     {
-        return $inertia->render('About', [
-            'title' => 'À propos',
+        return $inertia->render('Contact', [
+            'title' => 'Contact us',
         ]);
     }
 }
 ```
 
-**2. Le composant**
+**2. The page component**
 
 ```tsx
-// assets/Pages/About.tsx
+// assets/ContactPage/Contact.tsx
 type Props = { title: string };
 
-export default function About({ title }: Props) {
+export default function Contact({ title }: Props) {
     return <h1>{title}</h1>;
 }
 ```
 
-C'est tout : pas de route front, pas d'appel API. Les sous-dossiers fonctionnent aussi (`render('Users/Index')` → `assets/Pages/Users/Index.tsx`).
+That's it: no front-end route, no API call.
 
-> Si le SSR tourne, pense à `npm run build:ssr` + redémarrage du serveur SSR pour qu'il connaisse la nouvelle page.
+> ⚠️ PHP array keys become React prop names **exactly** (case-sensitive), and TypeScript can't check what PHP actually sends. When a prop is `undefined`, inspect the JSON response in DevTools → Network first.
+
+> If the SSR server is running, run `npm run build:ssr` and restart it so it knows about the new page.
+
+## Layout and navigation
+
+`assets/components/Layout.tsx` holds the main menu and wraps every page. It's registered as the default layout in **both** `app.tsx` and `ssr.tsx`:
+
+```tsx
+createInertiaApp({
+    resolve: resolvePage,
+    layout: () => Layout,
+});
+```
+
+It's a **persistent layout**: on navigation only the page is swapped, the layout isn't re-mounted, so its state survives. A page can opt for a different layout with `MyPage.layout = OtherLayout`.
+
+The active link is detected with `usePage().url`.
 
 ## Styles (Sass)
 
-- Point d'entrée : `assets/styles/app.scss`, déclaré comme **entrée Vite séparée** (`styles`) et chargé par `{{ vite_entry_link_tags('styles') }}` dans le `<head>`.
-- Variables : `assets/styles/_variables.scss` (partial, importé via `@use "variables" as *;`).
-- Utiliser `@use`, pas `@import` (déprécié par Sass).
+- Entry point: `assets/styles/app.scss`, declared as a **separate Vite entry** (`styles`) and loaded with `{{ vite_entry_link_tags('styles') }}` in `<head>`.
+- Variables: `assets/styles/_variables.scss` (a partial, loaded with `@use "variables" as *;`).
+- Use `@use`, not `@import` (deprecated in Sass).
 
-**Pourquoi une entrée séparée plutôt que `import "./app.scss"` dans `app.tsx` ?** En dev, Vite injecte le CSS importé depuis le JS *après* le chargement du JS. Avec le SSR, le HTML s'affiche avant → flash de contenu non stylé (FOUC). En entrée séparée, le CSS arrive via un vrai `<link>` dans le `<head>`, même en dev.
+**Why a separate entry instead of `import "./app.scss"` in `app.tsx`?** In dev, Vite injects JS-imported CSS _after_ the JS has loaded. With SSR the HTML shows up first → flash of unstyled content (FOUC). As a separate entry, the CSS is served through a real `<link>` in `<head>`, even in dev.
 
-Pour du style par composant : CSS Modules (`Composant.module.scss`), gérés nativement par Vite.
+For component-scoped styles, use CSS Modules (`Component.module.scss`), supported natively by Vite.
 
 ## SSR
 
-| Fichier | Rôle |
-|---|---|
-| `assets/ssr.tsx` | Point d'entrée Node : `createServer()` + `renderToString` |
-| `vite.ssr.config.js` | Config Vite dédiée (sans `vite-plugin-symfony`, avec `ssr.noExternal: ['@inertiajs/react']`) |
-| `config/packages/inertia.yaml` | `ssr_enabled`, `ssr_url`, `ssr_bundle` |
+| File                           | Purpose                                                                                                      |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `assets/ssr.tsx`               | Node entry point: `createServer()` + `renderToString`                                                        |
+| `vite.ssr.config.js`           | Dedicated Vite config (no `vite-plugin-symfony`, `publicDir: false`, `ssr.noExternal: ['@inertiajs/react']`) |
+| `config/packages/inertia.yaml` | `ssr_enabled`, `ssr_url`, `ssr_bundle`                                                                       |
 
-Commandes :
+Commands:
 
 ```bash
-symfony console inertia:start-ssr   # démarre le serveur Node (bloque le terminal)
-symfony console inertia:check-ssr   # vérifie qu'il répond
-symfony console inertia:stop-ssr    # l'arrête
+symfony console inertia:start-ssr   # start the Node server (blocks the terminal)
+symfony console inertia:check-ssr   # check it responds
+symfony console inertia:stop-ssr    # stop it
 ```
 
-Vérifier que le SSR fonctionne : afficher le code source de la page (Ctrl+U) → le HTML du composant doit être présent, pas seulement le JSON.
+To check SSR is working, view the page source (Ctrl+U): the component's HTML must be there, not just the JSON.
 
-**Règle d'or SSR** : pas d'accès à `window`, `document`, `localStorage`… dans le corps d'un composant (ça plante côté Node). Les mettre dans un `useEffect`, qui ne s'exécute que dans le navigateur.
+**SSR golden rule**: never touch `window`, `document`, `localStorage`… in a component's body (it crashes on Node). Put that code in a `useEffect`, which only runs in the browser.
 
 ---
 
-## Structure du projet
+## Project structure
 
 ```
 assets/
-├── app.tsx              # Entrée client : createInertiaApp()
-├── ssr.tsx              # Entrée SSR : createServer()
-├── Pages/               # Un fichier = une page Inertia
-│   └── Home.tsx
+├── app.tsx               # Client entry: createInertiaApp()
+├── ssr.tsx               # SSR entry: createServer()
+├── resolvePage.tsx       # Page name → component (shared by client & SSR)
+├── components/           # Shared components
+│   └── Layout.tsx        # Default persistent layout + menu
+├── HomePage/
+│   ├── Home.tsx          # render('Home')
+│   └── TechnoStack.tsx    # Local component
+├── AboutPage/
+│   └── About.tsx         # render('About')
 └── styles/
-    ├── app.scss         # Entrée Sass
+    ├── app.scss          # Sass entry
     └── _variables.scss
-bootstrap/ssr/           # Bundle SSR généré (git-ignoré)
+bootstrap/ssr/            # Generated SSR bundle (git-ignored)
 config/packages/
-└── inertia.yaml         # Config Inertia + SSR
-public/build/            # Assets client générés (git-ignoré)
-src/Controller/          # Contrôleurs → $inertia->render()
+└── inertia.yaml          # Inertia + SSR config
+public/build/             # Generated client assets (git-ignored)
+src/Controller/           # Controllers → $inertia->render()
 templates/
-└── base.html.twig       # L'unique vue Twig (vue racine Inertia)
+└── base.html.twig        # The one and only Twig view (Inertia root view)
 tsconfig.json
-vite.config.js           # Build client
-vite.ssr.config.js       # Build SSR
+vite.config.js            # Client build
+vite.ssr.config.js        # SSR build
 ```
 
-## Pièges connus
+## Troubleshooting
 
-| Symptôme | Cause | Solution |
-|---|---|---|
-| `@vitejs/plugin-react can't detect preamble` | Le script React Refresh n'est pas injecté (la page est servie par Symfony, pas Vite) | `vite_entry_script_tags('app', { dependency: 'react' })` dans `base.html.twig` |
-| `ERR_CONNECTION_REFUSED` sur `:5173`, plus de style | `npm run dev` arrêté, mais `public/build/.vite/entrypoints.json` pointe encore vers le serveur Vite | Relancer `npm run dev`, ou `npm run build` pour générer les assets statiques |
-| Flash sans style au chargement (dev) | CSS importé depuis le JS + SSR | CSS en entrée Vite séparée (déjà en place) |
-| `SSR bundle not found` | Bundle non construit, ou mauvais chemin | `npm run build:ssr` ; le bundle auto-détecte `bootstrap/ssr/ssr.mjs` mais Vite produit `ssr.js` → `ssr_bundle` est défini explicitement dans `inertia.yaml` |
-| Le SSR affiche une ancienne version | Le serveur Node charge le bundle une fois au démarrage | `npm run build:ssr` puis redémarrer `inertia:start-ssr` |
-| Nouvelle entrée Vite ignorée | `entrypoints.json` écrit au démarrage de Vite | Redémarrer `npm run dev` |
+| Symptom                                               | Cause                                                                                        | Fix                                                                                                                                         |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@vitejs/plugin-react can't detect preamble`          | The React Refresh script isn't injected (the page is served by Symfony, not Vite)            | `vite_entry_script_tags('app', { dependency: 'react' })` in `base.html.twig`                                                                |
+| `ERR_CONNECTION_REFUSED` on `:5173`, styles gone      | `npm run dev` stopped, but `public/build/.vite/entrypoints.json` still points to Vite        | Restart `npm run dev`, or run `npm run build` for static assets                                                                             |
+| Unstyled flash on load (dev)                          | JS-imported CSS + SSR                                                                        | CSS as a separate Vite entry (already set up)                                                                                               |
+| `Cannot read properties of undefined (reading 'map')` | Hot reload re-rendered a component with stale props, or the controller sends the wrong props | Hit F5; then check the controller's `render()` name and prop keys in the JSON response                                                      |
+| Hydration mismatch warning                            | SSR bundle is outdated, or client/SSR config differ (e.g. `layout` set in only one entry)    | `npm run build:ssr` + restart SSR; keep `app.tsx` and `ssr.tsx` in sync                                                                     |
+| `SSR bundle not found`                                | Bundle not built, or wrong path                                                              | `npm run build:ssr`. The bundle auto-detects `bootstrap/ssr/ssr.mjs` but Vite outputs `ssr.js`, hence `ssr_bundle` is set in `inertia.yaml` |
+| SSR shows an old version                              | The Node server loads the bundle once, at startup                                            | `npm run build:ssr`, then restart `inertia:start-ssr`                                                                                       |
+| New Vite entry ignored                                | `entrypoints.json` is written when Vite starts                                               | Restart `npm run dev`                                                                                                                       |
 
-## Ressources
+## Resources
 
 - [Inertia.js](https://inertiajs.com/)
 - [nytodev/inertia-bundle](https://github.com/nytodev/inertia-bundle)
