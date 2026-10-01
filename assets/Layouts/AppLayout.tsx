@@ -40,7 +40,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                             </Link>
                         </>
                     ) : (
-                        <Link href="/login">Login</Link>
+                        <>
+                            <Link href="/login">Login</Link>
+                            <Link href="/register">Register</Link>
+                        </>
                     )}
                 </div>
             </nav>
