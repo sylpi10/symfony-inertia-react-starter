@@ -1,18 +1,11 @@
 import "@inertiajs/core";
-
-export type User = {
-    id: number;
-    email: string;
-    roles: string[];
-    isVerified: boolean;
-};
+import type { User } from "./generated";
 
 declare module "@inertiajs/core" {
     export interface InertiaConfig {
         sharedPageProps: {
             auth: { user: User | null };
         };
-
         flashDataType: {
             success?: string;
             error?: string;

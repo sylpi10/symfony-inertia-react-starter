@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dto;
 
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 use App\Entity\User;
 
+#[TypeScript(name: "User")]
 final readonly class UserDto
 {
     /**

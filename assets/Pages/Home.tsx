@@ -1,9 +1,7 @@
 import { TechnoStack } from "../Components/TechnoStack";
+import type { HomePageProps } from "../types/generated";
 
-type Props = { title: string; para: string };
-type TechnosProps = { technos: string[] };
-
-export default function Home({ title, para, technos }: Props & TechnosProps) {
+export default function Home({ title, para, technos }: HomePageProps) {
     return (
         <div className="container">
             <h1>{title}</h1>

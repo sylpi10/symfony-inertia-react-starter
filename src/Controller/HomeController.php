@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Dto\Page\HomePageProps;
 use App\Service\TechStack;
 use Nytodev\InertiaBundle\Service\Inertia;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,19 +19,15 @@ final class HomeController extends AbstractController
     #[Route("/", name: "app_home")]
     public function index(): Response
     {
-        /**
-         * @var list<string> $technos
-         */
-        $technos = $this->techStack->getStack();
-
-        /** @var string $para */
-        $para =
-            "Home: Symfony with React via Inertia.js, server-side rendered with Node";
-
-        return $this->inertia->render("Home", [
-            "title" => "Home Page",
-            "para" => $para,
-            "technos" => $technos,
-        ]);
+        return $this->inertia->render(
+            "Home",
+            get_object_vars(
+                new HomePageProps(
+                    title: "Home Page",
+                    para: "Home: Symfony with React via Inertia.js, server-side rendered with Node",
+                    technos: $this->techStack->getStack(),
+                ),
+            ),
+        );
     }
 }

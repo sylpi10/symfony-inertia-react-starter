@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Dto\Page\AboutPageProps;
 use App\Service\TechStack;
 use Nytodev\InertiaBundle\Service\Inertia;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,11 +23,15 @@ final class AboutController extends AbstractController
          * @var list<string> $technos
          */ $technos = $this->techStack->getStack();
 
-        return $this->inertia->render("About", [
-            "title" => "About Page",
-            "para" =>
-                "About: Symfony with React via Inertia.js, server-side rendered with Node",
-            "technos" => $technos,
-        ]);
+        return $this->inertia->render(
+            "About",
+            get_object_vars(
+                new AboutPageProps(
+                    title: "About Page",
+                    para: "About: Symfony with React via Inertia.js, server-side rendered with Node",
+                    technos: $this->techStack->getStack(),
+                ),
+            ),
+        );
     }
 }
