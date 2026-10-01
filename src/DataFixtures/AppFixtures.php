@@ -24,7 +24,7 @@ final class AppFixtures extends Fixture
             ['Inertia.js', 'https://inertiajs.com'],
             ['React', 'https://react.dev'],
             ['TypeScript', 'https://www.typescriptlang.org'],
-            ['SSR', null],
+            ['SSR', 'https://inertiajs.com/docs/v3/advanced/server-side-rendering'],
             ['Sass', 'https://sass-lang.com'],
         ];
 

@@ -25,7 +25,8 @@ final class HomeController extends AbstractController
             get_object_vars(
                 new HomePageProps(
                     title: "Home Page",
-                    para: "Home: Symfony with React via Inertia.js, server-side rendered with Node",
+                    para: "A Symfony 8 starter with a React 19 + TypeScript,
+                    Inertia.js with SSR support",
                     technos: array_map(TechnoDto::fromEntity(...),
                         $this->technoRepository->findAllOrdered()),
                         // eq: array_map(fn (Techno $techno) => TechnoDto::fromEntity($techno), $technos);

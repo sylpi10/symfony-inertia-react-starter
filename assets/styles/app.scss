@@ -9,7 +9,7 @@ body {
     .container {
         background-color: $bg-container;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        padding: $spacing;
+        padding: $spacing 40px;
         width: fit-content;
         margin: $spacing auto;
         border-radius: 8px;
@@ -36,6 +36,50 @@ body {
         &.flash-error {
             background-color: #f8d7da;
             color: red;
+        }
+    }
+
+    .techno-stack .techno-list {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing;
+        margin: 40px;
+        justify-content: center;
+        li {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            a {
+                border-radius: 8px;
+                padding: 8px 16px;
+                color: #fff;
+                font-weight: bold;
+                text-decoration: none;
+                background-color: $main-color;
+                border: 2px inset $main-color;
+                transition:
+                    background-color 0.3s,
+                    color 0.3s;
+                &:hover {
+                    background-color: #fff;
+                    color: $main-color;
+                }
+            }
+        }
+    }
+
+    .logo-wrapper {
+        display: flex;
+        justify-content: center;
+        gap: $spacing;
+        margin: $spacing auto;
+        img {
+            width: 200px;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
     }
 }

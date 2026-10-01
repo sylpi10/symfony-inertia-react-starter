@@ -1,7 +1,5 @@
 export type AboutPageProps = {
     readonly title: string;
-    readonly para: string;
-    readonly technos: Techno[];
 };
 export type HomePageProps = {
     readonly title: string;
