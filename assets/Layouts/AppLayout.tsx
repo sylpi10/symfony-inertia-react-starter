@@ -1,5 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 import { ReactNode } from "react";
+import UserIcon from "../Components/Icons/UserIcon";
 
 const links = [
     { href: "/", label: "Home" },
@@ -7,19 +8,40 @@ const links = [
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-    const { url } = usePage();
+    const { url, props } = usePage();
+    const { user } = props.auth;
     return (
         <>
             <nav className="main-nav">
-                {links.map((link) => (
-                    <Link
-                        key={link.href}
-                        href={link.href}
-                        className={url === link.href ? "active" : undefined}
-                    >
-                        {link.label}
-                    </Link>
-                ))}
+                <ul>
+                    {links.map((link) => (
+                        <li key={link.href}>
+                            <Link
+                                href={link.href}
+                                className={
+                                    url === link.href ? "active" : undefined
+                                }
+                            >
+                                {link.label}
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+
+                {/* Right side: depends on the authenticated user */}
+                <div className="nav-user">
+                    {user ? (
+                        <>
+                            <UserIcon />
+                            <span className="nav-email">{user.email}</span>
+                            <Link href="/logout" method="post" as="button">
+                                Logout
+                            </Link>
+                        </>
+                    ) : (
+                        <Link href="/login">Login</Link>
+                    )}
+                </div>
             </nav>
             <main>{children}</main>
         </>

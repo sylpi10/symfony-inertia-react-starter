@@ -29,4 +29,12 @@ final class SecurityController extends AbstractController
 
         return $inertia->render("Auth/Login", $props);
     }
+
+    #[Route("/logout", name: "app_logout", methods: ["POST"])]
+    public function logout(): never
+    {
+        throw new \LogicException(
+            "Intercepted by the logout key of the firewall.",
+        );
+    }
 }
