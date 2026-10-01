@@ -7,6 +7,7 @@ export default function Login({ lastEmail }: Props) {
     const form = useForm({
         email: lastEmail,
         password: "",
+        remember: false,
     });
 
     function submit(event: FormEvent) {
@@ -48,6 +49,17 @@ export default function Login({ lastEmail }: Props) {
                         required
                     />
                 </div>
+                <label className="checkbox">
+                    <input
+                        type="checkbox"
+                        checked={form.data.remember}
+                        onChange={(e) =>
+                            form.setData("remember", e.target.checked)
+                        }
+                    />
+                    Remember me
+                </label>
+
                 <button type="submit" disabled={form.processing}>
                     Sign in
                 </button>
