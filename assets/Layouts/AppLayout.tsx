@@ -2,6 +2,7 @@ import { Link, usePage } from "@inertiajs/react";
 import { ReactNode } from "react";
 import UserIcon from "../Components/Icons/UserIcon";
 import FlashMessages from "../Components/FlashMessages";
+import VerifyEmailBanner from "../Components/VerifyEmailBanner";
 
 const links = [
     { href: "/", label: "Home" },
@@ -48,6 +49,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 </div>
             </nav>
             <main>
+                <VerifyEmailBanner />
                 <FlashMessages />
                 {children}
             </main>

@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Dto\RegisterUserInput;
 use App\Entity\User;
+use App\Security\EmailVerifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Nytodev\InertiaBundle\Service\Inertia;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -35,6 +36,7 @@ final class RegistrationController extends AbstractController
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $entityManager,
         Security $security,
+        EmailVerifier $emailVerifier,
     ): Response {
         $user = new User();
         $user->setEmail($input->email);
@@ -45,11 +47,13 @@ final class RegistrationController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
+        $emailVerifier->sendConfirmation($user);
+
         $security->login($user, "form_login", "main");
 
         $this->inertia->flash(
             "success",
-            "Welcome! Your account has been created.",
+            "Welcome! Check your inbox to confirm your email address.",
         );
 
         return $this->redirectToRoute(

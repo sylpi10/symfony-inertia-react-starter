@@ -4,6 +4,7 @@ export type User = {
     id: number;
     email: string;
     roles: string[];
+    isVerified: boolean;
 };
 
 declare module "@inertiajs/core" {

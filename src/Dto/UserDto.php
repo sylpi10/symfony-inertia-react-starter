@@ -15,6 +15,7 @@ final readonly class UserDto
         public int $id,
         public string $email,
         public array $roles,
+        public bool $isVerified,
     ) {}
 
     public static function fromEntity(User $user): self
@@ -23,6 +24,7 @@ final readonly class UserDto
             id: $user->getId(),
             email: $user->getEmail(),
             roles: $user->getRoles(),
+            isVerified: $user->isVerified(),
         );
     }
 }
