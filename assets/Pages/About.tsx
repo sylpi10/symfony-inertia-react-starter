@@ -1,4 +1,4 @@
-import { TechnoStack } from "../components/TechnoStack";
+import { TechnoStack } from "../Components/TechnoStack";
 
 type Props = { title: string; para: string };
 type TechnosProps = { technos: string[] };

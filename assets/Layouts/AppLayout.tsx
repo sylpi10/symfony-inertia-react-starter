@@ -6,7 +6,7 @@ const links = [
     { href: "/about", label: "About" },
 ];
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function AppLayout({ children }: { children: ReactNode }) {
     const { url } = usePage();
     return (
         <>

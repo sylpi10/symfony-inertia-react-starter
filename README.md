@@ -67,7 +67,7 @@ php -r 'echo bin2hex(random_bytes(16)), PHP_EOL;'
 
 ## Running in development
 
-Three processes, three terminals:
+Two processes, two terminals:
 
 ```bash
 # 1. PHP server
@@ -75,17 +75,20 @@ symfony serve -d
 
 # 2. Vite dev server (on-the-fly JS/CSS + hot reload)
 npm run dev
-
-# 3. (optional) SSR server
-npm run build:ssr
-symfony console inertia:start-ssr
 ```
 
 Then open **http://localhost:8000**.
 
 > ⚠️ `http://localhost:5173` is **not** the app: it's Vite's asset server. Always browse the app through Symfony (port 8000).
 
-The SSR server is optional in development: when it's down, Inertia silently falls back to client-side rendering.
+**SSR is off by default in development.** To check server-side rendering locally:
+
+| You want to…        | `.env.local`                                        | Terminals                                                                   |
+| ------------------- | --------------------------------------------------- | --------------------------------------------------------------------------- |
+| Develop as usual    | nothing (or `INERTIA_SSR=0`)                        | `symfony serve` + `npm run dev`                                             |
+| Check SSR           | `INERTIA_SSR=1`, then `symfony console cache:clear` | the same + `npm run build:ssr`, then `symfony console inertia:start-ssr`    |
+
+`INERTIA_SSR=1` only tells Symfony to **call** the Node server; it doesn't start it. When the Node server is down, Inertia silently falls back to client-side rendering.
 
 ## Production build
 
@@ -100,7 +103,7 @@ This script runs two builds:
 | `vite build`        | `vite.config.js`     | `public/build/`        | Client JS + CSS, `entrypoints.json` |
 | `npm run build:ssr` | `vite.ssr.config.js` | `bootstrap/ssr/ssr.js` | Node bundle for SSR                 |
 
-In production, run the SSR server under a process manager (systemd, Supervisor…) with `node bootstrap/ssr/ssr.js`, and restart it after every deploy.
+In production, set `INERTIA_SSR=1` and `INERTIA_SSR_URL` in the server's environment, run the SSR server under a process manager (systemd, Supervisor…) with `node bootstrap/ssr/ssr.js`, and restart it after every deploy.
 
 ---
 
@@ -140,23 +143,25 @@ There is **no client-side router**: routes live exclusively in Symfony (`#[Route
 
 Everything is a React component. A **page** is simply the root component a controller renders by name.
 
-**Resolution rule** (see `assets/resolvePage.tsx`):
+The project follows the standard Inertia convention from the official docs.
+
+**Resolution rule** (see `assets/pages.ts`): the name passed to `render()` is the path under `assets/Pages/`, without the extension.
 
 ```
-$inertia->render('Home')  →  assets/HomePage/Home.tsx
-$inertia->render('About') →  assets/AboutPage/About.tsx
+$inertia->render('Home')        →  assets/Pages/Home.tsx
+$inertia->render('About')       →  assets/Pages/About.tsx
+$inertia->render('Users/Index') →  assets/Pages/Users/Index.tsx
 ```
 
-The same resolver is shared by the client (`app.tsx`) and the SSR entry (`ssr.tsx`). Pages are lazy-loaded: each one becomes its own JS chunk, fetched on first visit.
+`assets/pages.ts` exports `resolvePage` and `resolveLayout`, shared by the client (`app.tsx`) and the SSR entry (`ssr.tsx`), so both always resolve pages and layouts the same way. Pages are lazy-loaded: each one becomes its own JS chunk, fetched on first visit.
 
-Other components live on two levels:
+The bundle's `pages.ensure_pages_exist` option is enabled: `render('Abuot')` throws `Inertia page component [Abuot] not found.` on the PHP side, instead of failing in the browser.
 
-| Level      | Location               | When                      |
-| ---------- | ---------------------- | ------------------------- |
-| **Local**  | Inside the page folder | Only used by that page    |
-| **Shared** | `assets/components/`   | Used by two or more pages |
-
-Rule of thumb: start local, move to `components/` when a second page needs it.
+| Folder               | Contents                                                       |
+| -------------------- | -------------------------------------------------------------- |
+| `assets/Pages/`      | One file = one component rendered by `$inertia->render()`      |
+| `assets/Layouts/`    | Persistent layouts (`AppLayout`, `GuestLayout`)                |
+| `assets/Components/` | Shared components (imported normally, no naming constraint)    |
 
 ## Adding a page
 
@@ -186,7 +191,7 @@ final class ContactController extends AbstractController
 **2. The page component**
 
 ```tsx
-// assets/ContactPage/Contact.tsx
+// assets/Pages/Contact.tsx
 type Props = { title: string };
 
 export default function Contact({ title }: Props) {
@@ -202,16 +207,23 @@ That's it: no front-end route, no API call.
 
 ## Layout and navigation
 
-`assets/components/Layout.tsx` holds the main menu and wraps every page. It's registered as the default layout in **both** `app.tsx` and `ssr.tsx`:
+Two layouts live in `assets/Layouts/`:
+
+| Layout        | Used by                       | Contents                          |
+| ------------- | ----------------------------- | --------------------------------- |
+| `AppLayout`   | Every page (default)          | Main menu                         |
+| `GuestLayout` | `Auth/*` pages (login, signup) | Minimal wrapper, no app menu      |
+
+The choice is made by name in `resolveLayout()` (`assets/pages.ts`), passed to `createInertiaApp` in **both** `app.tsx` and `ssr.tsx`:
 
 ```tsx
 createInertiaApp({
     resolve: resolvePage,
-    layout: () => Layout,
+    layout: resolveLayout,
 });
 ```
 
-It's a **persistent layout**: on navigation only the page is swapped, the layout isn't re-mounted, so its state survives. A page can opt for a different layout with `MyPage.layout = OtherLayout`.
+These are **persistent layouts**: on navigation only the page is swapped, the layout isn't re-mounted, so its state survives. A page can still force a different layout with `MyPage.layout = OtherLayout`.
 
 The active link is detected with `usePage().url`.
 
@@ -231,7 +243,10 @@ For component-scoped styles, use CSS Modules (`Component.module.scss`), supporte
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `assets/ssr.tsx`               | Node entry point: `createServer()` + `renderToString`                                                        |
 | `vite.ssr.config.js`           | Dedicated Vite config (no `vite-plugin-symfony`, `publicDir: false`, `ssr.noExternal: ['@inertiajs/react']`) |
-| `config/packages/inertia.yaml` | `ssr_enabled`, `ssr_url`, `ssr_bundle`                                                                       |
+| `config/packages/inertia.php`  | `ssr_enabled`, `ssr_url`, `ssr_bundle`, `pages`                                                              |
+| `.env` / `.env.local`          | `INERTIA_SSR` (on/off), `INERTIA_SSR_URL`                                                                    |
+
+**Why is the Inertia config in PHP rather than YAML?** The bundle reads `ssr_enabled` when the container is compiled, to decide whether to wire the SSR HTTP client. A `%env()%` placeholder is only resolved at runtime, too late. The PHP config reads `$_SERVER['INERTIA_SSR']` at compile time instead, which is why changing `INERTIA_SSR` requires a `symfony console cache:clear`. `ssr_url` is only used at runtime, so it stays a regular `%env(INERTIA_SSR_URL)%`.
 
 Commands:
 
@@ -253,20 +268,21 @@ To check SSR is working, view the page source (Ctrl+U): the component's HTML mus
 assets/
 ├── app.tsx               # Client entry: createInertiaApp()
 ├── ssr.tsx               # SSR entry: createServer()
-├── resolvePage.tsx       # Page name → component (shared by client & SSR)
-├── components/           # Shared components
-│   └── Layout.tsx        # Default persistent layout + menu
-├── HomePage/
+├── pages.ts              # resolvePage + resolveLayout (shared by client & SSR)
+├── Pages/                # One file = one page rendered by $inertia->render()
 │   ├── Home.tsx          # render('Home')
-│   └── TechnoStack.tsx    # Local component
-├── AboutPage/
 │   └── About.tsx         # render('About')
+├── Layouts/
+│   ├── AppLayout.tsx     # Default persistent layout + menu
+│   └── GuestLayout.tsx   # Layout for Auth/* pages
+├── Components/           # Shared components
+│   └── TechnoStack.tsx
 └── styles/
     ├── app.scss          # Sass entry
     └── _variables.scss
 bootstrap/ssr/            # Generated SSR bundle (git-ignored)
 config/packages/
-└── inertia.yaml          # Inertia + SSR config
+└── inertia.php           # Inertia + SSR config
 public/build/             # Generated client assets (git-ignored)
 src/Controller/           # Controllers → $inertia->render()
 templates/
@@ -285,7 +301,10 @@ vite.ssr.config.js        # SSR build
 | Unstyled flash on load (dev)                          | JS-imported CSS + SSR                                                                        | CSS as a separate Vite entry (already set up)                                                                                               |
 | `Cannot read properties of undefined (reading 'map')` | Hot reload re-rendered a component with stale props, or the controller sends the wrong props | Hit F5; then check the controller's `render()` name and prop keys in the JSON response                                                      |
 | Hydration mismatch warning                            | SSR bundle is outdated, or client/SSR config differ (e.g. `layout` set in only one entry)    | `npm run build:ssr` + restart SSR; keep `app.tsx` and `ssr.tsx` in sync                                                                     |
-| `SSR bundle not found`                                | Bundle not built, or wrong path                                                              | `npm run build:ssr`. The bundle auto-detects `bootstrap/ssr/ssr.mjs` but Vite outputs `ssr.js`, hence `ssr_bundle` is set in `inertia.yaml` |
+| `SSR bundle not found`                                | Bundle not built, or wrong path                                                              | `npm run build:ssr`. The bundle auto-detects `bootstrap/ssr/ssr.mjs` but Vite outputs `ssr.js`, hence `ssr_bundle` is set in `inertia.php`  |
+| `Inertia page component [X] not found`                | `render()` name doesn't match a file in `assets/Pages/` (case-sensitive)                     | Fix the name, or create `assets/Pages/X.tsx`                                                                                                |
+| `INERTIA_SSR` change has no effect                    | The value is read when the container is compiled                                             | `symfony console cache:clear`                                                                                                               |
+| `INERTIA_SSR=1` but no HTML in the page source        | The Node SSR server isn't running (Symfony silently falls back to client rendering)          | `npm run build:ssr`, then `symfony console inertia:start-ssr`                                                                               |
 | SSR shows an old version                              | The Node server loads the bundle once, at startup                                            | `npm run build:ssr`, then restart `inertia:start-ssr`                                                                                       |
 | New Vite entry ignored                                | `entrypoints.json` is written when Vite starts                                               | Restart `npm run dev`                                                                                                                       |
 

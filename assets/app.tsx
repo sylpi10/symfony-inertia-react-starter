@@ -1,8 +1,7 @@
 import { createInertiaApp } from "@inertiajs/react";
-import { resolvePage } from "./resolvePage";
-import Layout from "./components/Layout";
+import { resolveLayout, resolvePage } from "./pages";
 
 createInertiaApp({
     resolve: resolvePage,
-    layout: () => Layout,
+    layout: resolveLayout,
 });
