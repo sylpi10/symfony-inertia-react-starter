@@ -12,7 +12,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-#[AsEventListener(event: KernelEvents::REQUEST)]
+#[AsEventListener(event: KernelEvents::REQUEST, priority: 64)]
 final class InertiaShareListener
 {
     public function __construct(
