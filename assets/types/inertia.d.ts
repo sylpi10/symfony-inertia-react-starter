@@ -11,5 +11,10 @@ declare module "@inertiajs/core" {
         sharedPageProps: {
             auth: { user: User | null };
         };
+
+        flashDataType: {
+            success?: string;
+            error?: string;
+        };
     }
 }
