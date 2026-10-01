@@ -1,4 +1,4 @@
-import { useForm } from "@inertiajs/react";
+import { Link, useForm } from "@inertiajs/react";
 import type { FormEvent } from "react";
 
 type Props = { lastEmail: string };
@@ -64,6 +64,9 @@ export default function Login({ lastEmail }: Props) {
                     Sign in
                 </button>
             </form>
+            <Link className="forgot-password" href="/reset-password">
+                Forgot your password?
+            </Link>
         </div>
     );
 }

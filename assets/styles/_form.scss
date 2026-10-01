@@ -40,3 +40,14 @@ form {
         }
     }
 }
+
+.forgot-password {
+    color: $main-color;
+    text-decoration: none;
+    margin: auto;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 28px;
+}
