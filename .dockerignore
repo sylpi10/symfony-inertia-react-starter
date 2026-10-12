@@ -1,0 +1,3 @@
+# The images only need docker/: the project itself is bind-mounted at runtime
+*
+!docker/

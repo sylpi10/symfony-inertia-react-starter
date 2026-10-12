@@ -25,3 +25,22 @@ test:
 	php bin/console doctrine:migrations:migrate -n --env=test
 	php bin/console doctrine:fixtures:load -n --env=test
 	php bin/phpunit
+
+
+# Containers run as the current user
+DOCKER_COMPOSE = HOST_UID=$(shell id -u) HOST_GID=$(shell id -g) docker compose
+
+docker-up:
+	$(DOCKER_COMPOSE) up -d --build
+
+docker-down:
+	$(DOCKER_COMPOSE) down
+
+docker-logs:
+	$(DOCKER_COMPOSE) logs -f
+
+docker-fixtures:
+	$(DOCKER_COMPOSE) exec php php bin/console doctrine:fixtures:load -n
+
+docker-test:
+	$(DOCKER_COMPOSE) exec php sh -c "php bin/console doctrine:migrations:migrate -n --env=test && php bin/console doctrine:fixtures:load -n --env=test && php bin/phpunit"

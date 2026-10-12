@@ -7,7 +7,15 @@ import symfonyPlugin from "vite-plugin-symfony";
 // import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-    plugins: [react(), symfonyPlugin()],
+    plugins: [
+        react(),
+        // VITE_ORIGIN and VITE_HOST are only set by compose.yaml (Docker)
+        symfonyPlugin({ originOverride: process.env.VITE_ORIGIN }),
+    ],
+    server: {
+        host: process.env.VITE_HOST,
+    },
+
     build: {
         rollupOptions: {
             input: {

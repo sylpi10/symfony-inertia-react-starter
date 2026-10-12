@@ -1,25 +1,37 @@
-
+# Development stack: `make docker-up`, then http://localhost:8000
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    image: postgres:${POSTGRES_VERSION:-16}-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
-      POSTGRES_USER: ${POSTGRES_USER:-app}
-    healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
-      timeout: 5s
-      retries: 5
-      start_period: 60s
-    volumes:
-      - database_data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
+    php:
+        build:
+            context: .
+            target: php_dev
+        # Run as the host user, so that files written in the project (vendor/, var/) belong to you
+        user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+        environment:
+            SERVER_NAME: ":8000" # plain HTTP, no certificate
+            DATABASE_URL: "sqlite:////srv/data/data_%kernel.environment%.db"
+        ports:
+            - "${APP_PORT:-8000}:8000"
+        volumes:
+            - .:/app
+            - sqlite_data:/srv/data
+
+    node:
+        build:
+            context: .
+            target: node_dev
+        user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+        command: sh -c "npm ci && npm run dev"
+        environment:
+            # Listen on every interface of the container...
+            VITE_HOST: 0.0.0.0
+            # ...but tell the browser to load assets (and open the HMR socket) on the published port
+            VITE_ORIGIN: "http://localhost:${VITE_PORT:-5173}"
+        ports:
+            - "${VITE_PORT:-5173}:5173"
+        volumes:
+            - .:/app
+            - node_modules:/app/node_modules
 
 volumes:
-###> doctrine/doctrine-bundle ###
-  database_data:
-###< doctrine/doctrine-bundle ###
+    sqlite_data:
+    node_modules:
