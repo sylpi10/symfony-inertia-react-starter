@@ -1,0 +1,64 @@
+name: CI
+
+on:
+    push:
+        branches: [master]
+    pull_request:
+
+# A new push cancels the run still in progress on the same branch
+concurrency:
+    group: ci-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    php:
+        name: PHP (lint, schema, tests, types drift)
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: "8.4"
+                  extensions: intl, pdo_sqlite, zip
+                  coverage: none
+
+            - run: composer validate --strict
+            - run: composer install --no-interaction --prefer-dist --no-progress
+
+            - run: php bin/console lint:container
+
+            - name: Schema matches the migrations
+              run: |
+                  php bin/console doctrine:migrations:migrate --no-interaction
+                  php bin/console doctrine:schema:validate
+
+            - name: Tests
+              run: make test
+
+            # `composer types` formats its output with Prettier, hence Node here too
+            - uses: actions/setup-node@v5
+              with:
+                  node-version: 24
+                  cache: npm
+            - run: npm ci
+
+            - name: Generated TypeScript types are up to date
+              run: |
+                  composer types
+                  git diff --exit-code assets/types
+
+    front:
+        name: Front (typecheck, build)
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+
+            - uses: actions/setup-node@v5
+              with:
+                  node-version: 24
+                  cache: npm
+
+            - run: npm ci
+            - run: npx tsc --noEmit
+            - run: npm run build # client + SSR bundles
