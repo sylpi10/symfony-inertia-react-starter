@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "_variables" as *;
 
 form {
@@ -36,7 +37,7 @@ form {
         color: white;
         cursor: pointer;
         &:hover {
-            background-color: lighten($main-color, 10%);
+            background-color: color.adjust($main-color, $lightness: 10%);
         }
     }
 }

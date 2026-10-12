@@ -43,6 +43,7 @@ This starts the Symfony server in the background, along with the Vite dev server
 | `make stop`  | Stops the server and its workers                                |
 | `make logs`  | Tails the server and Vite logs                                  |
 | `make build` | Builds the client and SSR bundles (`public/build`, `bootstrap/ssr`) |
+| `make test`  | Prepares the test database, then runs PHPUnit                   |
 
 Without `make`: `symfony serve -d` does the same as `make dev`. Without the Symfony CLI, run your PHP server and `npm run dev` in two terminals.
 
@@ -148,7 +149,23 @@ src/
 ├── Enum/           # Enums, exported to TypeScript
 ├── Entity/, Repository/, DataFixtures/
 └── EventListener/  # Shared props, CSRF, error pages
+tests/              # Functional tests (InertiaWebTestCase + Controller/)
 ```
+
+## Testing
+
+```bash
+make test                               # migrations + fixtures on var/data_test.db, then PHPUnit
+php bin/phpunit --filter testCreate     # a single test, once the test database exists
+```
+
+Functional tests live in `tests/Controller/` and extend `tests/InertiaWebTestCase.php`, which talks to the app the way the Inertia client does:
+
+- `visit()` sends the `X-Inertia` header and copies the `XSRF-TOKEN` cookie into `X-XSRF-TOKEN` (without it, every POST is rejected). Responses are JSON, so tests need neither Vite nor a build.
+- `page()` returns an `AssertableInertiaPage` to assert the component and its props; `flash()` reads flash messages.
+- Fixtures are loaded once; [dama/doctrine-test-bundle](https://github.com/dmaicher/doctrine-test-bundle) rolls back the database after each test.
+
+Covered: pages and 404, CSRF, registration, login (case-insensitive email, throttling), and the admin CRUD including access control.
 
 ## Documentation
 
