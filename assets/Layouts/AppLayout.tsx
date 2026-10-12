@@ -28,6 +28,21 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                             </Link>
                         </li>
                     ))}
+
+                    {user?.roles.includes("ROLE_ADMIN") && (
+                        <li>
+                            <Link
+                                href="/admin/technos"
+                                className={
+                                    url.startsWith("/admin")
+                                        ? "active"
+                                        : undefined
+                                }
+                            >
+                                Admin
+                            </Link>
+                        </li>
+                    )}
                 </ul>
 
                 {/* Right side: depends on the authenticated user */}

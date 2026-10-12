@@ -1,0 +1,4 @@
+# Started and stopped together with `symfony server:start -d` / `server:stop`
+workers:
+    vite:
+        cmd: ['npm', 'run', 'dev']
