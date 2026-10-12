@@ -19,3 +19,8 @@ logs:
 build:
 	npm ci
 	npm run build
+
+test:
+	php bin/console doctrine:migrations:migrate -n --env=test
+	php bin/console doctrine:fixtures:load -n --env=test
+	php bin/phpunit

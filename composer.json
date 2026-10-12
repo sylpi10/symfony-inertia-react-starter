@@ -90,6 +90,7 @@
         }
     },
     "require-dev": {
+        "dama/doctrine-test-bundle": "^8.7",
         "doctrine/doctrine-fixtures-bundle": "^4.3",
         "phpunit/phpunit": "^13.3.6",
         "spatie/typescript-transformer": "^3.3",
