@@ -1,6 +1,7 @@
 @use "variables" as *;
 @use "form" as *;
 @use "nav" as *;
+@use "admin" as *;
 
 body {
     background-color: $bg-page;

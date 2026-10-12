@@ -1,0 +1,98 @@
+@use "variables" as *;
+
+.admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing;
+    h1 {
+        margin: 0;
+    }
+    a {
+        padding: 8px 16px;
+        border-radius: 4px;
+        background-color: $main-color;
+        color: #fff;
+        font-weight: bold;
+        text-decoration: none;
+    }
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    th,
+    td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    th {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: #666;
+    }
+    tbody tr:hover {
+        background-color: #f7f7f7;
+    }
+    td {
+        // long URLs must not stretch the table
+        overflow-wrap: anywhere;
+    }
+    button,
+    td:last-child a {
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #fff;
+        color: $main-color;
+        font-size: 0.9rem;
+        text-decoration: none;
+        cursor: pointer;
+        &:hover:not(:disabled) {
+            border-color: $main-color;
+        }
+        &:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        & + button {
+            margin-left: 6px;
+        }
+    }
+    // Order and actions columns
+    td:nth-child(3),
+    td:last-child {
+        white-space: nowrap;
+    }
+    td:last-child {
+        text-align: right;
+        button {
+            border-color: firebrick;
+            color: firebrick;
+            &:hover:not(:disabled) {
+                background-color: firebrick;
+                color: #fff;
+            }
+        }
+    }
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: $spacing;
+    a {
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        color: $main-color;
+        text-decoration: none;
+        &.active {
+            background-color: $main-color;
+            border-color: $main-color;
+            color: #fff;
+        }
+    }
+}
