@@ -1,0 +1,21 @@
+.PHONY: help dev stop logs build
+
+help:
+	@echo "make dev    Symfony server + Vite (workers of .symfony.local.yaml)"
+	@echo "make stop   stops server and his workers"
+	@echo "make logs   follows logs"
+	@echo "make build  builds Vite client + SSR (public/build, bootstrap/ssr)"
+
+dev:
+	symfony server:start -d
+	@symfony server:status
+
+stop:
+	symfony server:stop
+
+logs:
+	symfony server:log
+
+build:
+	npm ci
+	npm run build
