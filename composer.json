@@ -1,5 +1,5 @@
 {
-    "name": "sylpi10/symfony-inertia-react",
+    "name": "sylpi10/symfony-inertia-react-starter",
     "description": "Symfony starter with React + TypeScript via Inertia.js, with SSR",
     "type": "project",
     "license": "MIT",

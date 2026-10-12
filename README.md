@@ -16,7 +16,7 @@ Or only Docker: see [Running with Docker](#running-with-docker).
 ## Getting started
 
 ```bash
-composer create-project sylpi10/symfony-inertia-react my-app
+composer create-project sylpi10/symfony-inertia-react-starter my-app
 cd my-app
 npm install
 ```
@@ -45,13 +45,13 @@ make dev
 
 This starts the Symfony server in the background, along with the Vite dev server (hot reload), declared as a worker in `.symfony.local.yaml`.
 
-| Command      | What it does                                                    |
-| ------------ | --------------------------------------------------------------- |
-| `make dev`   | Starts the Symfony server + Vite in the background              |
-| `make stop`  | Stops the server and its workers                                |
-| `make logs`  | Tails the server and Vite logs                                  |
+| Command      | What it does                                                        |
+| ------------ | ------------------------------------------------------------------- |
+| `make dev`   | Starts the Symfony server + Vite in the background                  |
+| `make stop`  | Stops the server and its workers                                    |
+| `make logs`  | Tails the server and Vite logs                                      |
 | `make build` | Builds the client and SSR bundles (`public/build`, `bootstrap/ssr`) |
-| `make test`  | Prepares the test database, then runs PHPUnit                   |
+| `make test`  | Prepares the test database, then runs PHPUnit                       |
 
 Without `make`: `symfony serve -d` does the same as `make dev`. Without the Symfony CLI, run your PHP server and `npm run dev` in two terminals.
 
@@ -66,13 +66,13 @@ Open **http://localhost:8000** and sign in with one of the demo accounts:
 
 Useful commands:
 
-| Command                                          | What it does                                             |
-| ------------------------------------------------ | -------------------------------------------------------- |
-| `composer types`                                 | Regenerates `assets/types/generated.ts` from PHP DTOs    |
-| `npm run typecheck`                              | Type-checks the front end (`tsc --noEmit`)               |
-| `npm run lint`                                   | Checks the formatting of `assets/` with Prettier         |
-| `symfony console doctrine:fixtures:load -n`      | Resets the database with demo data (deletes all users!)  |
-| `/_profiler`                                     | Symfony profiler: requests, SQL, **emails sent in dev**  |
+| Command                                     | What it does                                            |
+| ------------------------------------------- | ------------------------------------------------------- |
+| `composer types`                            | Regenerates `assets/types/generated.ts` from PHP DTOs   |
+| `npm run typecheck`                         | Type-checks the front end (`tsc --noEmit`)              |
+| `npm run lint`                              | Checks the formatting of `assets/` with Prettier        |
+| `symfony console doctrine:fixtures:load -n` | Resets the database with demo data (deletes all users!) |
+| `/_profiler`                                | Symfony profiler: requests, SQL, **emails sent in dev** |
 
 SSR is **off in development** (no hot reload on the Node side). To check it: see [SSR and production](docs/ssr-and-production.md).
 
@@ -87,13 +87,13 @@ make docker-fixtures    # demo data + demo accounts
 
 Then open **http://localhost:8000**, as without Docker.
 
-| Command                | What it does                                               |
-| ---------------------- | ---------------------------------------------------------- |
-| `make docker-up`       | Builds and starts the containers                           |
-| `make docker-down`     | Stops them (volumes are kept)                              |
-| `make docker-logs`     | Follows the logs of both containers                        |
-| `make docker-fixtures` | Loads the fixtures in the Docker database                  |
-| `make docker-test`     | Runs PHPUnit in the `php` container                        |
+| Command                | What it does                              |
+| ---------------------- | ----------------------------------------- |
+| `make docker-up`       | Builds and starts the containers          |
+| `make docker-down`     | Stops them (volumes are kept)             |
+| `make docker-logs`     | Follows the logs of both containers       |
+| `make docker-fixtures` | Loads the fixtures in the Docker database |
+| `make docker-test`     | Runs PHPUnit in the `php` container       |
 
 Good to know:
 
@@ -151,15 +151,15 @@ No front-end route, no API call. Links between pages use `<Link href="/contact">
 
 `/admin/technos` manages the technos listed on the home page. It is a reference for the patterns you will reuse in your own CRUDs:
 
-| Pattern                 | Where to look                                                                                               |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Access control          | `#[IsGranted("ROLE_ADMIN")]` on `Admin/TechnoController`: anonymous → `/login`, non-admin → 403 error page   |
-| One input DTO, two uses | `TechnoInput` with `#[MapRequestPayload]`, shared by create (`POST`) and update (`PUT`)                      |
-| One form page, two uses | `Pages/Admin/Technos/Form.tsx`: `form.post()` or `form.put()` depending on the `techno` prop                 |
-| Delete                  | `router.delete()` after a `confirm()`, answered by a **303** redirect                                        |
-| Pagination              | Doctrine `Paginator` in `TechnoRepository`, `?page=N` bound with `#[MapQueryParameter]`                      |
-| Optimistic update       | Reordering with `router.optimistic(...).patch(...)`: the row moves at once, Inertia rolls back on failure    |
-| Enum shared with TS     | `MoveDirection` (`up` / `down`), exported to `generated.ts`                                                  |
+| Pattern                 | Where to look                                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Access control          | `#[IsGranted("ROLE_ADMIN")]` on `Admin/TechnoController`: anonymous → `/login`, non-admin → 403 error page |
+| One input DTO, two uses | `TechnoInput` with `#[MapRequestPayload]`, shared by create (`POST`) and update (`PUT`)                    |
+| One form page, two uses | `Pages/Admin/Technos/Form.tsx`: `form.post()` or `form.put()` depending on the `techno` prop               |
+| Delete                  | `router.delete()` after a `confirm()`, answered by a **303** redirect                                      |
+| Pagination              | Doctrine `Paginator` in `TechnoRepository`, `?page=N` bound with `#[MapQueryParameter]`                    |
+| Optimistic update       | Reordering with `router.optimistic(...).patch(...)`: the row moves at once, Inertia rolls back on failure  |
+| Enum shared with TS     | `MoveDirection` (`up` / `down`), exported to `generated.ts`                                                |
 
 ## Conventions
 
@@ -212,13 +212,13 @@ Covered: pages and 404, CSRF, registration, login (case-insensitive email, throt
 
 ## Documentation
 
-| Guide                                                    | Contents                                                              |
-| -------------------------------------------------------- | --------------------------------------------------------------------- |
-| [Architecture](docs/architecture.md)                     | How Inertia works, page resolution, layouts, styles, images, full project structure |
-| [TypeScript types](docs/types.md)                        | DTOs, `#[TypeScript]`, `composer types`, shared props typing          |
+| Guide                                                        | Contents                                                                                                         |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| [Architecture](docs/architecture.md)                         | How Inertia works, page resolution, layouts, styles, images, full project structure                              |
+| [TypeScript types](docs/types.md)                            | DTOs, `#[TypeScript]`, `composer types`, shared props typing                                                     |
 | [Authentication, forms and security](docs/authentication.md) | Login, registration, password reset, email verification, shared props, flash messages, CSRF, error pages, emails |
-| [SSR and production](docs/ssr-and-production.md)         | Enabling SSR, Node server, production build and environment variables |
-| [Troubleshooting](docs/troubleshooting.md)               | Common errors and their fixes                                         |
+| [SSR and production](docs/ssr-and-production.md)             | Enabling SSR, Node server, production build and environment variables                                            |
+| [Troubleshooting](docs/troubleshooting.md)                   | Common errors and their fixes                                                                                    |
 
 ## License
 
