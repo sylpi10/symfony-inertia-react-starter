@@ -3,6 +3,8 @@
     "private": true,
     "scripts": {
         "dev": "vite",
+        "typecheck": "tsc --noEmit",
+        "lint": "prettier --check assets",
         "build": "vite build && npm run build:ssr",
         "build:ssr": "vite build --config vite.ssr.config.js --ssr assets/ssr.tsx"
     },

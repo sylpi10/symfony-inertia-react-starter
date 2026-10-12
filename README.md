@@ -2,7 +2,7 @@
 
 A **Symfony 8.1** starter with a **React 19 + TypeScript** front end, glued together by **Inertia.js v3**: you build a single-page app **without writing an API**. Controllers stay regular Symfony controllers, but instead of rendering Twig templates they return **a React page + its props**.
 
-Included: Vite, Sass, server-side rendering, authentication (login, registration, password reset, email verification), CSRF protection, an example admin CRUD, and TypeScript types generated from PHP DTOs.
+Included: Vite, Sass, server-side rendering, authentication (login, registration, password reset, email verification), CSRF protection, an example admin CRUD, TypeScript types generated from PHP DTOs, functional tests, a Docker dev stack and a GitHub Actions CI.
 
 ## Requirements
 
@@ -11,23 +11,31 @@ Included: Vite, Sass, server-side rendering, authentication (login, registration
 - [Symfony CLI](https://symfony.com/download) (recommended, required by `make dev`)
 - `make` (optional)
 
+Or only Docker: see [Running with Docker](#running-with-docker).
+
 ## Getting started
 
-Click **Use this template** on GitHub, clone your new repository, then:
+```bash
+composer create-project sylpi10/symfony-inertia-react my-app
+cd my-app
+npm install
+```
+
+`create-project` installs the PHP dependencies, then runs `composer setup`, which:
+
+1. generates a fresh `APP_SECRET` in `.env.dev` (so that no two projects share the same one);
+2. runs the migrations, creating `var/data_dev.db` (SQLite);
+3. loads the fixtures: demo data + demo accounts.
+
+Prefer GitHub's **Use this template** button? Clone your new repository, then run the same steps by hand:
 
 ```bash
 composer install
+composer setup
 npm install
-
-symfony console doctrine:migrations:migrate --no-interaction   # creates var/data_dev.db (SQLite)
-symfony console doctrine:fixtures:load --no-interaction        # demo data + demo accounts
 ```
 
-Generate your own `APP_SECRET` and paste it in `.env.dev`:
-
-```bash
-php -r 'echo bin2hex(random_bytes(16)), PHP_EOL;'
-```
+> ⚠️ `composer setup` is meant to run once: it resets the database and replaces `APP_SECRET`.
 
 ## Running in development
 
@@ -61,11 +69,39 @@ Useful commands:
 | Command                                          | What it does                                             |
 | ------------------------------------------------ | -------------------------------------------------------- |
 | `composer types`                                 | Regenerates `assets/types/generated.ts` from PHP DTOs    |
-| `npx tsc --noEmit`                               | Type-checks the front end                                |
+| `npm run typecheck`                              | Type-checks the front end (`tsc --noEmit`)               |
+| `npm run lint`                                   | Checks the formatting of `assets/` with Prettier         |
 | `symfony console doctrine:fixtures:load -n`      | Resets the database with demo data (deletes all users!)  |
 | `/_profiler`                                     | Symfony profiler: requests, SQL, **emails sent in dev**  |
 
 SSR is **off in development** (no hot reload on the Node side). To check it: see [SSR and production](docs/ssr-and-production.md).
+
+## Running with Docker
+
+A development stack that needs neither PHP nor Node on your machine: [FrankenPHP](https://frankenphp.dev) for Symfony, and a Node container for Vite (hot reload included).
+
+```bash
+make docker-up          # first start takes a minute or two (composer install, npm ci)
+make docker-fixtures    # demo data + demo accounts
+```
+
+Then open **http://localhost:8000**, as without Docker.
+
+| Command                | What it does                                               |
+| ---------------------- | ---------------------------------------------------------- |
+| `make docker-up`       | Builds and starts the containers                           |
+| `make docker-down`     | Stops them (volumes are kept)                              |
+| `make docker-logs`     | Follows the logs of both containers                        |
+| `make docker-fixtures` | Loads the fixtures in the Docker database                  |
+| `make docker-test`     | Runs PHPUnit in the `php` container                        |
+
+Good to know:
+
+- The `php` container runs `composer install` and the migrations each time it starts.
+- The SQLite database lives in a Docker volume, separate from `var/data_dev.db`. `docker compose down -v` deletes it, along with the container's `node_modules`.
+- Containers run as your user, so `vendor/` and `var/` stay yours.
+- Ports 8000 and 5173 are the same as `make dev`: stop one before starting the other, or change them with `APP_PORT=8080 VITE_PORT=5174 make docker-up`.
+- This stack is for development only. For production, see [SSR and production](docs/ssr-and-production.md).
 
 ## Adding a page
 
@@ -166,6 +202,13 @@ Functional tests live in `tests/Controller/` and extend `tests/InertiaWebTestCas
 - Fixtures are loaded once; [dama/doctrine-test-bundle](https://github.com/dmaicher/doctrine-test-bundle) rolls back the database after each test.
 
 Covered: pages and 404, CSRF, registration, login (case-insensitive email, throttling), and the admin CRUD including access control.
+
+### Continuous integration
+
+`.github/workflows/ci.yaml` runs on every push to `master` and on pull requests, without Docker:
+
+- **PHP**: `composer validate`, `lint:container`, migrations + `doctrine:schema:validate`, PHPUnit, and a check that `composer types` leaves `assets/types` unchanged (a DTO changed without regenerating the types fails the build).
+- **Front**: `npm run typecheck`, `npm run lint`, and the client + SSR builds.
 
 ## Documentation
 

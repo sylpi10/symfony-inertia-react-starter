@@ -9,6 +9,7 @@
         "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-pdo_sqlite": "*",
         "doctrine/doctrine-bundle": "^3.3",
         "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "^3.7",
@@ -78,7 +79,15 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
-        "types": "@php bin/console app:typescript:generate"
+        "types": "@php bin/console app:typescript:generate",
+        "post-create-project-cmd": [
+            "@setup"
+        ],
+        "setup": [
+            "@php bin/generate-secret.php",
+            "@php bin/console doctrine:migrations:migrate --no-interaction",
+            "@php bin/console doctrine:fixtures:load --no-interaction"
+        ]
     },
     "conflict": {
         "symfony/symfony": "*"
