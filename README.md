@@ -25,7 +25,10 @@ npm install
 
 1. generates a fresh `APP_SECRET` in `.env.dev` (so that no two projects share the same one);
 2. runs the migrations, creating `var/data_dev.db` (SQLite);
-3. loads the fixtures: demo data + demo accounts.
+3. loads the fixtures: demo data + demo accounts;
+4. prepares the test database (`var/data_test.db`) the same way, so that `php bin/phpunit` works right away.
+
+Then make the project yours: replace `name` and `description` in `composer.json` (they still read `sylpi10/symfony-inertia-react-starter`), and run `composer update --lock` to keep `composer.lock` in sync.
 
 Prefer GitHub's **Use this template** button? Clone your new repository, then run the same steps by hand:
 
@@ -35,7 +38,7 @@ composer setup
 npm install
 ```
 
-> ⚠️ `composer setup` is meant to run once: it resets the database and replaces `APP_SECRET`.
+> ⚠️ `composer setup` is meant to run once: it resets both databases (dev and test) and replaces `APP_SECRET`.
 
 ## Running in development
 
@@ -194,6 +197,8 @@ tests/              # Functional tests (InertiaWebTestCase + Controller/)
 make test                               # migrations + fixtures on var/data_test.db, then PHPUnit
 php bin/phpunit --filter testCreate     # a single test, once the test database exists
 ```
+
+The test database is created by `composer setup` (or `make test`). If PHPUnit fails with `no such table`, it is missing: run `make test`. Run it again after adding a migration or changing the fixtures.
 
 Functional tests live in `tests/Controller/` and extend `tests/InertiaWebTestCase.php`, which talks to the app the way the Inertia client does:
 
