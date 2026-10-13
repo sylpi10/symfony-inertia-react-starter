@@ -18,6 +18,29 @@ body {
         p {
             font-size: 1.3rem;
         }
+        .command {
+            display: flex;
+            align-items: stretch;
+            gap: 8px;
+            pre {
+                flex: 1;
+                margin: 0;
+                padding: 12px 16px;
+                border-radius: 4px;
+                background-color: $bg-page;
+                // a long command scrolls instead of stretching the container
+                overflow-x: auto;
+            }
+            button {
+                min-width: 80px;
+                border: none;
+                border-radius: 4px;
+                background-color: $main-color;
+                color: #fff;
+                font-weight: bold;
+                cursor: pointer;
+            }
+        }
     }
 
     .flash {
