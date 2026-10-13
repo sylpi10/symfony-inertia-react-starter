@@ -31,7 +31,6 @@ final class TechnoControllerTest extends InertiaWebTestCase
         $id = $this->techno('Symfony')->getId();
 
         $this->loginAs('test@example.com');
-        $this->visit('GET', '/'); // any page, to receive the XSRF-TOKEN cookie
         $this->visit('DELETE', "/admin/technos/$id");
 
         self::assertResponseStatusCodeSame(403);

@@ -102,15 +102,22 @@ They're displayed by `Components/FlashMessages.tsx`, present in both layouts (`s
 
 ## CSRF protection
 
-`src/EventListener/InertiaCsrfListener.php` implements the mechanism recommended by the Inertia docs:
+The app uses Symfony's **stateless CSRF protection** (`config/packages/csrf.yaml`), checked by `src/EventListener/InertiaCsrfListener.php`:
 
-1. On every response, it sets an `XSRF-TOKEN` cookie (readable by JS, `SameSite=Lax`) holding a token from Symfony's `CsrfTokenManager`.
-2. Inertia's HTTP client automatically sends it back in an `X-XSRF-TOKEN` header.
-3. On every `POST`, `PUT`, `PATCH` and `DELETE`, the listener checks the header. It runs with **priority 10**, before the firewall (8), so `/login` and `/logout` are protected too.
+1. On every `POST`, `PUT`, `PATCH` and `DELETE`, the listener asks Symfony whether the request comes from the app itself.
+2. Symfony answers from the headers browsers attach to every request: `Sec-Fetch-Site: same-origin`, or else an `Origin` / `Referer` matching the app's own URL. A request forged by another site cannot fake them.
+3. The listener runs with **priority 10**, before the firewall (8), so `/login` and `/logout` are protected too.
 
-On an invalid token, the user is redirected back (same origin only) with a "This page has expired" flash message, instead of an error modal. All unsafe requests are checked, not only Inertia ones: a plain HTML form posted from another site is rejected too.
+On a rejected request, the user is redirected back (same origin only) with a "This page has expired" flash message, instead of an error modal. All unsafe requests are checked, not only Inertia ones: a plain HTML form posted from another site is rejected too.
 
-The session cookie is `SameSite=Lax` (Symfony's default). Since the token is stored in the session, every visitor gets a session.
+**No token, no cookie, no session.** Nothing is stored server-side, so an anonymous visitor (or a crawler) browsing public pages never opens a session. A session only starts when it is needed: at login, or when a flash message or validation errors must survive a redirect.
+
+Two things to know:
+
+- **Behind a reverse proxy**, Symfony must know the public scheme and host to compare them with `Origin` / `Referer`: configure [trusted proxies](https://symfony.com/doc/current/deployment/proxies.html). Over HTTPS, modern browsers send `Sec-Fetch-Site`, which doesn't depend on it.
+- **Non-browser clients** (curl, scripts) send none of these headers and are rejected on unsafe requests. That is intended: the app has no public API.
+
+The session cookie is `SameSite=Lax` (Symfony's default).
 
 ## Error pages
 

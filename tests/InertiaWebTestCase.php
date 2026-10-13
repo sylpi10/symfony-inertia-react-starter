@@ -28,19 +28,18 @@ abstract class InertiaWebTestCase extends WebTestCase
     }
 
     /**
-     * Sends an Inertia request: X-Inertia header, plus the XSRF-TOKEN cookie
-     * copied into the X-XSRF-TOKEN header, as the Inertia client does.
+     * Sends an Inertia request the way a browser does: X-Inertia header, plus
+     * Sec-Fetch-Site, the header CSRF protection relies on. Pass crossSite: true
+     * to play a request forged by another site.
      *
      * @param array<string, mixed> $data
      */
-    protected function visit(string $method, string $uri, array $data = [], bool $csrf = true, bool $asForm = false): void
+    protected function visit(string $method, string $uri, array $data = [], bool $crossSite = false, bool $asForm = false): void
     {
-        $server = ['HTTP_X_INERTIA' => 'true'];
-
-        $token = $this->client->getCookieJar()->get('XSRF-TOKEN');
-        if ($csrf && null !== $token) {
-            $server['HTTP_X_XSRF_TOKEN'] = $token->getValue();
-        }
+        $server = [
+            'HTTP_X_INERTIA' => 'true',
+            'HTTP_SEC_FETCH_SITE' => $crossSite ? 'cross-site' : 'same-origin',
+        ];
 
         // The login form is posted as form data (forceFormData), everything else as JSON
         if ($asForm) {

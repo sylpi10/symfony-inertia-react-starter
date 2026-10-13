@@ -1,0 +1,8 @@
+# Stateless CSRF protection: the "inertia" token is validated from the request's
+# origin (Sec-Fetch-Site, Origin or Referer headers), not from a token kept in the session.
+# Anonymous visitors therefore need neither a session nor a cookie.
+# See src/EventListener/InertiaCsrfListener.php
+framework:
+    csrf_protection:
+        stateless_token_ids:
+            - inertia

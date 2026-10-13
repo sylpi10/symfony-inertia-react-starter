@@ -143,7 +143,7 @@ src/
 ├── Entity/                    # User, Techno, ResetPasswordRequest
 ├── EventListener/
 │   ├── InertiaShareListener.php      # Shared props (auth.user)
-│   ├── InertiaCsrfListener.php       # XSRF-TOKEN cookie + X-XSRF-TOKEN check
+│   ├── InertiaCsrfListener.php       # Same-origin check on unsafe requests
 │   └── InertiaErrorPageListener.php  # Pages/Error.tsx for errors
 ├── Repository/
 └── Security/EmailVerifier.php # Sends signed verification emails

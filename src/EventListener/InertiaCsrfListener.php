@@ -6,20 +6,22 @@ namespace App\EventListener;
 
 use Nytodev\InertiaBundle\Service\Inertia;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
+/**
+ * Rejects every unsafe request (POST, PUT, PATCH, DELETE) that doesn't come from the app itself.
+ *
+ * The "inertia" token is stateless (config/packages/csrf.yaml): Symfony validates it from
+ * the Sec-Fetch-Site, Origin or Referer header that browsers attach to the request, so
+ * no token has to be stored in the session or sent in a cookie.
+ */
 final class InertiaCsrfListener
 {
     private const TOKEN_ID = "inertia";
-    private const COOKIE_NAME = "XSRF-TOKEN";
-    private const HEADER_NAME = "X-XSRF-TOKEN";
 
     public function __construct(
         private CsrfTokenManagerInterface $csrfTokenManager,
@@ -38,11 +40,8 @@ final class InertiaCsrfListener
             return;
         }
 
-        $token = new CsrfToken(
-            self::TOKEN_ID,
-            (string) $request->headers->get(self::HEADER_NAME),
-        );
-        if ($this->csrfTokenManager->isTokenValid($token)) {
+        // For a stateless id, getToken() returns a constant: validity comes from the request's origin
+        if ($this->csrfTokenManager->isTokenValid($this->csrfTokenManager->getToken(self::TOKEN_ID))) {
             return;
         }
 
@@ -61,26 +60,6 @@ final class InertiaCsrfListener
                 $sameHost ? $referer : "/",
                 Response::HTTP_SEE_OTHER,
             ),
-        );
-    }
-
-    #[AsEventListener(event: KernelEvents::RESPONSE)]
-    public function setTokenCookie(ResponseEvent $event): void
-    {
-        if (!$event->isMainRequest()) {
-            return;
-        }
-
-        $event->getResponse()->headers->setCookie(
-            Cookie::create(self::COOKIE_NAME)
-                ->withValue(
-                    $this->csrfTokenManager
-                        ->getToken(self::TOKEN_ID)
-                        ->getValue(),
-                )
-                ->withSecure($event->getRequest()->isSecure())
-                ->withHttpOnly(false)
-                ->withSameSite(Cookie::SAMESITE_LAX),
         );
     }
 }

@@ -13,6 +13,15 @@ export INERTIA_SSR=1
 APP_CACHE_DIR="$(mktemp -d)"
 export APP_CACHE_DIR
 
+# The test starts its own servers: refuse to run against ones that are already there
+for BUSY_PORT in 13714 "$PORT"; do
+    if curl -s -o /dev/null --max-time 1 "http://127.0.0.1:$BUSY_PORT/"; then
+        echo "FAIL: port $BUSY_PORT is already in use. Stop your SSR server (symfony console inertia:stop-ssr) and retry." >&2
+        rm -rf "$APP_CACHE_DIR"
+        exit 1
+    fi
+done
+
 node bootstrap/ssr/ssr.js >/dev/null 2>&1 &
 SSR_PID=$!
 php -S "127.0.0.1:$PORT" -t public tests/ssr-smoke-router.php >/dev/null 2>&1 &

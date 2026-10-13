@@ -2,7 +2,7 @@
 
 A **Symfony 8.1** starter with a **React 19 + TypeScript** front end, glued together by **Inertia.js v3**: you build a single-page app **without writing an API**. Controllers stay regular Symfony controllers, but instead of rendering Twig templates they return **a React page + its props**.
 
-Included: Vite, Sass, server-side rendering, authentication (login, registration, password reset, email verification), CSRF protection, SEO (head tags per page, sitemap, `robots.txt`), an example admin CRUD, TypeScript types generated from PHP DTOs, functional tests, a Docker dev stack and a GitHub Actions CI.
+Included: Vite, Sass, server-side rendering, authentication (login, registration, password reset, email verification), stateless CSRF protection (no session for anonymous visitors), SEO (head tags per page, sitemap, `robots.txt`), an example admin CRUD, TypeScript types generated from PHP DTOs, functional tests, a Docker dev stack and a GitHub Actions CI.
 
 ## Quick start
 
@@ -216,7 +216,7 @@ The test database is created by `composer setup` (or `make test`). If PHPUnit fa
 
 Functional tests live in `tests/Controller/` and extend `tests/InertiaWebTestCase.php`, which talks to the app the way the Inertia client does:
 
-- `visit()` sends the `X-Inertia` header and copies the `XSRF-TOKEN` cookie into `X-XSRF-TOKEN` (without it, every POST is rejected). Responses are JSON, so tests need neither Vite nor a build.
+- `visit()` sends the `X-Inertia` header and `Sec-Fetch-Site: same-origin`, as a browser does (without it, every POST is rejected by the CSRF protection). Responses are JSON, so tests need neither Vite nor a build.
 - `page()` returns an `AssertableInertiaPage` to assert the component and its props; `flash()` reads flash messages.
 - Fixtures are loaded once; [dama/doctrine-test-bundle](https://github.com/dmaicher/doctrine-test-bundle) rolls back the database after each test.
 
