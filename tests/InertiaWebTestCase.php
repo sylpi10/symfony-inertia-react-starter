@@ -9,6 +9,7 @@ use App\Repository\UserRepository;
 use Nytodev\InertiaBundle\Testing\AssertableInertiaPage;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Mime\Email;
 
 /**
  * Makes a WebTestCase talk to the app the way the Inertia client does.
@@ -69,6 +70,24 @@ abstract class InertiaWebTestCase extends WebTestCase
         $page = json_decode((string) $this->client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
 
         return $page['flash'][$key] ?? null;
+    }
+
+    /**
+     * Returns the first link matching $pattern in the email sent by the last request.
+     * Must be called right after that request.
+     */
+    protected function linkFromEmail(string $pattern): string
+    {
+        $email = self::getMailerMessage();
+        self::assertInstanceOf(Email::class, $email, 'No email was sent by the last request.');
+
+        self::assertSame(
+            1,
+            preg_match('#href="([^"]*'.$pattern.'[^"]*)"#', (string) $email->getHtmlBody(), $matches),
+            sprintf('No link matching "%s" in the email.', $pattern),
+        );
+
+        return html_entity_decode($matches[1]);
     }
 
     protected function loginAs(string $email): void

@@ -4,6 +4,19 @@ A **Symfony 8.1** starter with a **React 19 + TypeScript** front end, glued toge
 
 Included: Vite, Sass, server-side rendering, authentication (login, registration, password reset, email verification), CSRF protection, an example admin CRUD, TypeScript types generated from PHP DTOs, functional tests, a Docker dev stack and a GitHub Actions CI.
 
+## Quick start
+
+```bash
+composer create-project sylpi10/symfony-inertia-react-starter my-app
+cd my-app
+npm install
+make dev
+```
+
+Open **http://localhost:8000** and sign in with `admin@example.com` / `admin1234`.
+
+Needs PHP ≥ 8.4, Composer, Node 24 and the [Symfony CLI](https://symfony.com/download). No PHP or Node on your machine? Use [Docker](#running-with-docker) instead. Details in [Getting started](#getting-started).
+
 ## Requirements
 
 - PHP ≥ 8.4 with `pdo_sqlite`
@@ -206,7 +219,7 @@ Functional tests live in `tests/Controller/` and extend `tests/InertiaWebTestCas
 - `page()` returns an `AssertableInertiaPage` to assert the component and its props; `flash()` reads flash messages.
 - Fixtures are loaded once; [dama/doctrine-test-bundle](https://github.com/dmaicher/doctrine-test-bundle) rolls back the database after each test.
 
-Covered: pages and 404, CSRF, registration, login (case-insensitive email, throttling), and the admin CRUD including access control.
+Covered: pages and 404, CSRF, registration, email verification, login (case-insensitive email, throttling), password reset, and the admin CRUD including access control.
 
 ### Continuous integration
 
@@ -222,7 +235,7 @@ Covered: pages and 404, CSRF, registration, login (case-insensitive email, throt
 | [Architecture](docs/architecture.md)                         | How Inertia works, page resolution, layouts, styles, images, full project structure                              |
 | [TypeScript types](docs/types.md)                            | DTOs, `#[TypeScript]`, `composer types`, shared props typing                                                     |
 | [Authentication, forms and security](docs/authentication.md) | Login, registration, password reset, email verification, shared props, flash messages, CSRF, error pages, emails |
-| [SSR and production](docs/ssr-and-production.md)             | Enabling SSR, Node server, production build and environment variables                                            |
+| [SSR and production](docs/ssr-and-production.md)             | Enabling SSR, Node server, production build, asset versioning, deploy order, known limitations |
 | [Troubleshooting](docs/troubleshooting.md)                   | Common errors and their fixes                                                                                    |
 
 ## License
