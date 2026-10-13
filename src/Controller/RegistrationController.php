@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Dto\RegisterUserInput;
 use App\Entity\User;
 use App\Security\EmailVerifier;
+use App\Seo\SeoFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Nytodev\InertiaBundle\Service\Inertia;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,7 +19,10 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class RegistrationController extends AbstractController
 {
-    public function __construct(private Inertia $inertia) {}
+    public function __construct(
+        private Inertia $inertia,
+        private SeoFactory $seo,
+    ) {}
 
     #[Route("/register", name: "app_register", methods: ["GET"])]
     public function show(): Response
@@ -27,7 +31,9 @@ final class RegistrationController extends AbstractController
             return $this->redirectToRoute("app_home");
         }
 
-        return $this->inertia->render("Auth/Register");
+        return $this->inertia->render("Auth/Register", [
+            "seo" => $this->seo->noindex("Create an account"),
+        ]);
     }
 
     #[Route("/register", name: "app_register_submit", methods: ["POST"])]

@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
     php:
-        name: PHP (lint, schema, tests, types drift)
+        name: PHP (lint, schema, tests, SSR, types drift)
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v5
@@ -26,6 +26,15 @@ jobs:
             - run: composer validate --strict
             - run: composer install --no-interaction --prefer-dist --no-progress
 
+            # Node here too: the HTML and SSR tests need the built assets,
+            # and `composer types` formats its output with Prettier
+            - uses: actions/setup-node@v5
+              with:
+                  node-version: 24
+                  cache: npm
+            - run: npm ci
+            - run: npm run build
+
             - run: php bin/console lint:container
 
             - name: Schema matches the migrations
@@ -36,12 +45,8 @@ jobs:
             - name: Tests
               run: make test
 
-            # `composer types` formats its output with Prettier, hence Node here too
-            - uses: actions/setup-node@v5
-              with:
-                  node-version: 24
-                  cache: npm
-            - run: npm ci
+            - name: Home page is server-rendered with its head tags
+              run: sh tests/ssr-smoke-test.sh
 
             - name: Generated TypeScript types are up to date
               run: |

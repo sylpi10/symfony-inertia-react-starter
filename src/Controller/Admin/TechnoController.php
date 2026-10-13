@@ -11,6 +11,7 @@ use App\Dto\TechnoDto;
 use App\Dto\TechnoInput;
 use App\Entity\Techno;
 use App\Repository\TechnoRepository;
+use App\Seo\SeoFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Nytodev\InertiaBundle\Service\Inertia;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,6 +32,7 @@ final class TechnoController extends AbstractController
         private Inertia $inertia,
         private TechnoRepository $technoRepository,
         private EntityManagerInterface $entityManager,
+        private SeoFactory $seo,
     ) {}
 
     #[Route("", name: "index", methods: ["GET"])]
@@ -52,6 +54,7 @@ final class TechnoController extends AbstractController
                     technos: array_map(TechnoDto::fromEntity(...), iterator_to_array($paginator, false)),
                     page: $page,
                     totalPages: $totalPages,
+                    seo: $this->seo->noindex("Technos"),
                 ),
             ),
         );
@@ -62,7 +65,12 @@ final class TechnoController extends AbstractController
     {
         return $this->inertia->render(
             "Admin/Technos/Form",
-            get_object_vars(new TechnoFormPageProps(techno: null)),
+            get_object_vars(
+                new TechnoFormPageProps(
+                    techno: null,
+                    seo: $this->seo->noindex("New techno"),
+                ),
+            ),
         );
     }
 
@@ -88,7 +96,12 @@ final class TechnoController extends AbstractController
     {
         return $this->inertia->render(
             "Admin/Technos/Form",
-            get_object_vars(new TechnoFormPageProps(techno: TechnoDto::fromEntity($techno))),
+            get_object_vars(
+                new TechnoFormPageProps(
+                    techno: TechnoDto::fromEntity($techno),
+                    seo: $this->seo->noindex(sprintf('Edit "%s"', $techno->getName())),
+                ),
+            ),
         );
     }
 

@@ -149,6 +149,8 @@ src/
 └── Security/EmailVerifier.php # Sends signed verification emails
 templates/
 ├── base.html.twig             # The Inertia root view
+├── _seo.html.twig             # Head tags when SSR is off
+├── seo/                       # sitemap.xml and robots.txt
 ├── registration/              # Verification email
 └── reset_password/            # Password reset email
 var/data_dev.db                # SQLite database (git-ignored)

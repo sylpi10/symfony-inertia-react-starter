@@ -2,7 +2,7 @@
 
 A **Symfony 8.1** starter with a **React 19 + TypeScript** front end, glued together by **Inertia.js v3**: you build a single-page app **without writing an API**. Controllers stay regular Symfony controllers, but instead of rendering Twig templates they return **a React page + its props**.
 
-Included: Vite, Sass, server-side rendering, authentication (login, registration, password reset, email verification), CSRF protection, an example admin CRUD, TypeScript types generated from PHP DTOs, functional tests, a Docker dev stack and a GitHub Actions CI.
+Included: Vite, Sass, server-side rendering, authentication (login, registration, password reset, email verification), CSRF protection, SEO (head tags per page, sitemap, `robots.txt`), an example admin CRUD, TypeScript types generated from PHP DTOs, functional tests, a Docker dev stack and a GitHub Actions CI.
 
 ## Quick start
 
@@ -68,6 +68,7 @@ This starts the Symfony server in the background, along with the Vite dev server
 | `make logs`  | Tails the server and Vite logs                                      |
 | `make build` | Builds the client and SSR bundles (`public/build`, `bootstrap/ssr`) |
 | `make test`  | Prepares the test database, then runs PHPUnit                       |
+| `make test-ssr` | Builds the assets, then checks the home page is server-rendered |
 
 Without `make`: `symfony serve -d` does the same as `make dev`. Without the Symfony CLI, run your PHP server and `npm run dev` in two terminals.
 
@@ -219,7 +220,7 @@ Functional tests live in `tests/Controller/` and extend `tests/InertiaWebTestCas
 - `page()` returns an `AssertableInertiaPage` to assert the component and its props; `flash()` reads flash messages.
 - Fixtures are loaded once; [dama/doctrine-test-bundle](https://github.com/dmaicher/doctrine-test-bundle) rolls back the database after each test.
 
-Covered: pages and 404, CSRF, registration, email verification, login (case-insensitive email, throttling), password reset, and the admin CRUD including access control.
+Covered: pages and 404, SEO props and head tags, sitemap and `robots.txt`, CSRF, registration, email verification, login (case-insensitive email, throttling), password reset, and the admin CRUD including access control.
 
 ### Continuous integration
 
@@ -236,6 +237,7 @@ Covered: pages and 404, CSRF, registration, email verification, login (case-inse
 | [TypeScript types](docs/types.md)                            | DTOs, `#[TypeScript]`, `composer types`, shared props typing                                                     |
 | [Authentication, forms and security](docs/authentication.md) | Login, registration, password reset, email verification, shared props, flash messages, CSRF, error pages, emails |
 | [SSR and production](docs/ssr-and-production.md)             | Enabling SSR, Node server, production build, asset versioning, deploy order, known limitations |
+| [SEO](docs/seo.md) | Head tags per page (`SeoDto`), indexing rules, share image, sitemap and `robots.txt` |
 | [Troubleshooting](docs/troubleshooting.md)                   | Common errors and their fixes                                                                                    |
 
 ## License

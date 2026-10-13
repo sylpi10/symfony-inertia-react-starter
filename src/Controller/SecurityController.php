@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Seo\SeoFactory;
 use Nytodev\InertiaBundle\Service\Inertia;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,8 +15,12 @@ final class SecurityController extends AbstractController
     public function login(
         Inertia $inertia,
         AuthenticationUtils $authenticationUtils,
+        SeoFactory $seo,
     ): Response {
-        $props = ["lastEmail" => $authenticationUtils->getLastUsername()];
+        $props = [
+            "lastEmail" => $authenticationUtils->getLastUsername(),
+            "seo" => $seo->noindex("Sign in"),
+        ];
 
         $error = $authenticationUtils->getLastAuthenticationError();
         if (null !== $error) {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\EventListener;
 
+use App\Seo\SeoFactory;
 use Nytodev\InertiaBundle\Service\Inertia;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -21,6 +22,7 @@ final class InertiaErrorPageListener
 {
     public function __construct(
         private Inertia $inertia,
+        private SeoFactory $seo,
         #[Autowire("%kernel.debug%")] private bool $debug,
     ) {}
 
@@ -41,7 +43,10 @@ final class InertiaErrorPageListener
             return;
         }
 
-        $response = $this->inertia->render("Error", ["status" => $status]);
+        $response = $this->inertia->render("Error", [
+            "status" => $status,
+            "seo" => $this->seo->noindex(Response::$statusTexts[$status] ?? "Error"),
+        ]);
         $response->setStatusCode($status);
 
         $event->setResponse($response);

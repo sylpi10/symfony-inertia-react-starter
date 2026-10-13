@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dto\Page;
 
+use App\Dto\SeoDto;
 use App\Dto\TechnoDto;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -12,5 +13,6 @@ final readonly class TechnoFormPageProps
 {
     public function __construct(
         public ?TechnoDto $techno,
+        public SeoDto $seo,
     ) {}
 }

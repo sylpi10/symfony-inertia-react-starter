@@ -1,0 +1,12 @@
+{# Server-side fallback for assets/Components/Seo.tsx, used when SSR is off: keep both in sync.
+   "data-inertia" lets the React component take these tags over once the page is loaded. #}
+<title data-inertia>{{ seo.title }}</title>
+{% if seo.description %}<meta data-inertia name="description" content="{{ seo.description }}">{% endif %}
+{% if seo.canonical %}<link data-inertia rel="canonical" href="{{ seo.canonical }}">{% endif %}
+{% if seo.noindex %}<meta data-inertia name="robots" content="noindex">{% endif %}
+<meta data-inertia property="og:type" content="website">
+<meta data-inertia property="og:title" content="{{ seo.title }}">
+{% if seo.description %}<meta data-inertia property="og:description" content="{{ seo.description }}">{% endif %}
+{% if seo.canonical %}<meta data-inertia property="og:url" content="{{ seo.canonical }}">{% endif %}
+{% if seo.image %}<meta data-inertia property="og:image" content="{{ seo.image }}">{% endif %}
+<meta data-inertia name="twitter:card" content="{{ seo.image ? 'summary_large_image' : 'summary' }}">

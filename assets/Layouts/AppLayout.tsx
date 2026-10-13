@@ -2,6 +2,7 @@ import { Link, usePage } from "@inertiajs/react";
 import { ReactNode } from "react";
 import UserIcon from "../Components/Icons/UserIcon";
 import FlashMessages from "../Components/FlashMessages";
+import Seo from "../Components/Seo";
 import VerifyEmailBanner from "../Components/VerifyEmailBanner";
 
 const links = [
@@ -14,6 +15,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     const { user } = props.auth;
     return (
         <>
+            <Seo {...props.seo} />
             <nav className="main-nav">
                 <ul>
                     {links.map((link) => (

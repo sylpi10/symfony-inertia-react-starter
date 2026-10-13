@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Dto\ForgotPasswordInput;
 use App\Dto\ResetPasswordInput;
 use App\Entity\User;
+use App\Seo\SeoFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Nytodev\InertiaBundle\Service\Inertia;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -30,12 +31,15 @@ final class ResetPasswordController extends AbstractController
         private ResetPasswordHelperInterface $resetPasswordHelper,
         private EntityManagerInterface $entityManager,
         private Inertia $inertia,
+        private SeoFactory $seo,
     ) {}
 
     #[Route("", name: "app_forgot_password_request", methods: ["GET"])]
     public function request(): Response
     {
-        return $this->inertia->render("Auth/ForgotPassword");
+        return $this->inertia->render("Auth/ForgotPassword", [
+            "seo" => $this->seo->noindex("Reset your password"),
+        ]);
     }
 
     #[Route("", name: "app_forgot_password_request_submit", methods: ["POST"])]
@@ -86,6 +90,7 @@ final class ResetPasswordController extends AbstractController
     {
         return $this->inertia->render("Auth/CheckEmail", [
             "expiresInMinutes" => $this->tokenLifetimeInMinutes(),
+            "seo" => $this->seo->noindex("Check your email"),
         ]);
     }
 
@@ -106,7 +111,9 @@ final class ResetPasswordController extends AbstractController
             return $this->redirectToRoute("app_forgot_password_request");
         }
 
-        return $this->inertia->render("Auth/ResetPassword");
+        return $this->inertia->render("Auth/ResetPassword", [
+            "seo" => $this->seo->noindex("Choose a new password"),
+        ]);
     }
 
     #[Route("/reset", name: "app_reset_password_submit", methods: ["POST"])]
