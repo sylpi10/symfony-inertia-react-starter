@@ -15,7 +15,7 @@ export APP_CACHE_DIR
 
 node bootstrap/ssr/ssr.js >/dev/null 2>&1 &
 SSR_PID=$!
-php -S "127.0.0.1:$PORT" -t public >/dev/null 2>&1 &
+php -S "127.0.0.1:$PORT" -t public tests/ssr-smoke-router.php >/dev/null 2>&1 &
 PHP_PID=$!
 trap 'kill "$SSR_PID" "$PHP_PID" 2>/dev/null; rm -rf "$APP_CACHE_DIR"' EXIT
 
